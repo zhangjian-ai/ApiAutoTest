@@ -1,0 +1,19 @@
+demo:
+  spec:
+    marks: [ "SMOKE","DAILY" ]
+  info:
+    desc: "演示用例"
+    author: "xz"
+    level: "p1"
+    time: "2022.10.26"
+  steps: [
+    {
+      api: "baidu.home",
+      log: "访问百度首页",
+      request: {
+      },
+      response: {
+        status_code: 200
+      }
+    }
+  ]
