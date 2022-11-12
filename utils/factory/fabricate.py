@@ -23,9 +23,11 @@ class Fabricate:
         return "".join(random.sample(string, n))
 
     @classmethod
-    def random_text(cls, suffix=""):
+    def random_text(cls, suffix="", num=12):
         """
         随机文本
         :return:
         """
-        return cls.faker.sentence().strip(".") + suffix
+        text = cls.faker.sentence(nb_words=num, variable_nb_words=False)
+
+        return text[:num] + suffix

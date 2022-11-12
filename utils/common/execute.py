@@ -44,11 +44,13 @@ def http_request(method="POST", url=None, data=None, params=None, headers=None, 
             if detail:
                 log.info(f'响应体: {res}')
             res["status_code"] = response.status_code
+            res["content"] = len(response.content)
             return res
 
         if detail:
             log.warning(f'响应体: {response.text}')
-        return {"status_code": response.status_code}
+
+        return {"status_code": response.status_code, "content": len(response.content)}
 
     except Exception as e:
         log.error(f'http 请求异常: {traceback.format_exc()}')
@@ -65,25 +67,20 @@ def verify(expect: dict, response: dict):
 
         # 如果预期值是str、int、float那么就直接对比
         if isinstance(value, (str, int, float)):
-            # 特殊值处理，判断对象的长度
-            if key == "EQUAL":
-                assert value == len(response), f'\n' \
-                                               f'KEY: {key} \n' \
-                                               f'预期对象长度: {value}\n' \
-                                               f'实际对象长度: {len(response)}\n' \
-                                               f'实际对象: {response}\n'
-            elif key == "GREATER":
-                assert value < len(response), f'\n' \
-                                              f'KEY: {key} \n' \
-                                              f'预期最小长度: {int(value) + 1}\n' \
-                                              f'实际对象长度: {len(response)}\n' \
-                                              f'实际对象: {response}\n'
-            elif key == "LESS":
-                assert value > len(response), f'\n' \
-                                              f'KEY: {key} \n' \
-                                              f'预期最大长度: {int(value) - 1}\n' \
-                                              f'实际对象长度: {len(response)}\n' \
-                                              f'实际对象: {response}\n'
+            # 比较运算处理
+            if key in ("<", ">", "==", ">=", "<=", "!="):
+                real_value = response
+                if not isinstance(response, (int, float)):
+                    real_value = len(response)
+
+                assert eval(f"{real_value} {key} {value}"), f'\n' \
+                                                            f'KEY: {key} \n' \
+                                                            f'运算符: {key} ' \
+                                                            f'(如果实际返回值是一个对象，那么此时检验的是对象的长度) \n' \
+                                                            f'预期值: {value}\n' \
+                                                            f'实际值: {real_value}\n' \
+                                                            f'返回值: {response}\n'
+
             else:
                 assert isinstance(response, dict) \
                        and value == response.get(key), f'\n' \
@@ -106,12 +103,12 @@ def verify(expect: dict, response: dict):
                                                           f'预期值: {value}\n' \
                                                           f'实际值: {real_value}\n'
 
-            # 列表长度校验
-            if len(value) != len(real_value):
-                assert False, f'\n' \
-                              f'KEY: {key} \n' \
-                              f'预期列表长度: {len(value)}\n' \
-                              f'实际列表长度: {len(real_value)}\n'
+            # # 列表长度校验
+            # if len(value) != len(real_value):
+            #     assert False, f'\n' \
+            #                   f'KEY: {key} \n' \
+            #                   f'预期列表长度: {len(value)}\n' \
+            #                   f'实际列表长度: {len(real_value)}\n'
 
             # 列表项依次校验
             for index, sub_value in enumerate(value):
@@ -126,6 +123,14 @@ def verify(expect: dict, response: dict):
 
                 # 如果列表项是字典，那么要求需要校验的列表项要和实际响应列表项按索引对应
                 elif isinstance(sub_value, dict):
+                    # 判断索引是否合法
+                    if index >= len(real_value):
+                        assert False, f'\n' \
+                                      f'KEY: {key}\n' \
+                                      f'预期列表: {value}\n' \
+                                      f'实际列表: {real_value}\n' \
+                                      f'预期索引值({index})无法在实际响应结果中使用'
+
                     # 判断返回值列表该索引处是否也为字典，如果是则 递归调用 本方法
                     if isinstance(real_value[index], dict):
                         verify(sub_value, real_value[index])

@@ -49,6 +49,57 @@ def pytest_sessionstart(session):
     session.session_start = time.strftime('%Y-%m-%d %H:%M:%S')
 
 
+def pytest_generate_tests(metafunc):
+    """
+    用例收集阶段钩子
+    生成（多个）对测试函数的参数化调用
+    """
+    full = metafunc.module.__file__
+    file = os.path.basename(full).replace(".py", ".yaml")
+    path = os.path.dirname(full).replace("tests", "data", 1)
+
+    case_name = metafunc.function.__name__
+
+    # 获取用例数据
+    data = load_yaml(os.path.join(path, file)).get(case_name)
+    parameters = data.pop("param", None)
+    ids = None
+    items = []
+
+    # 参数化逻辑
+    if parameters:
+        # ids
+        ids = parameters.get("ids")
+        # 将参数拆分成参数化对象
+        keys = [key for key in parameters.keys()]
+        # 将所有非列表值修正为列表
+        for key in keys:
+            if not isinstance(parameters[key], (list, tuple)):
+                parameters[key] = [parameters[key]]
+        # 生成参数化结果
+        for i in range(len(parameters[keys[0]])):
+            param = {}
+            for key in keys:
+                param[key] = parameters[key][i]
+            item = deepcopy(data)
+            item["param"] = param
+            items.append(item)
+    else:
+        items.append(data)
+
+    # 用例使用到的夹具
+    fixtures = metafunc.definition._fixtureinfo.argnames
+
+    # 夹具参数化
+    for fixture in fixtures:
+        # 维护需要参数化的夹具
+        if fixture in ('executor',):
+            metafunc.parametrize(argnames=fixture,
+                                 argvalues=items,
+                                 ids=ids or [data["info"]["description"]] * len(items),
+                                 indirect=True)
+
+
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     """
@@ -62,6 +113,31 @@ def pytest_runtest_makereport(item, call):
 
         printer = getattr(log, 'info' if flag == 'passed' else 'error')
         printer(f'执行结束: {result.outcome.upper()}')
+
+
+def pytest_collection_modifyitems(session, config, items):
+    """
+    处理参数化乱码问题
+    """
+    # item表示每个测试用例，解决console中文显示问题
+    for item in items:
+        item.name = item.name.encode("utf-8").decode("unicode-escape")
+        item._nodeid = item._nodeid.encode("utf-8").decode("unicode-escape")
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    """
+    根据测试结果打印用例完成的日志
+    """
+    out = yield
+
+    if call.when == 'call':
+        report = out.get_result()
+        flag = report.outcome
+
+        printer = getattr(log, 'info' if flag == 'passed' else 'error')
+        printer(f'执行结束: {report.outcome.upper()}')
 
 
 @pytest.hookimpl(trylast=True)
@@ -81,34 +157,11 @@ def pytest_sessionfinish(session, exitstatus):
     log.info(f"测试进程结束，Exit Code:{exitstatus}")
 
 
-@pytest.fixture(scope="module")
-def module_data(request):
-    """
-    模块维度加载测试数据
-    """
-    full = request.module.__file__
-    file = os.path.basename(full).replace(".py", ".yaml")
-    path = os.path.dirname(full).replace("tests", "data", 1)
-
-    data_path = os.path.join(path, file)
-
-    return load_yaml(data_path)
-
-
 @pytest.fixture()
-def executor(request, record_property, module_data):
+def executor(request, record_property):
     """
     用例执行器
     """
-    func_name = request.function.__name__
-    data = deepcopy(module_data.get(func_name))
-
-    # 绑定用例信息
-    info = data.get("info", {})
-    [record_property(key, val) for key, val in info.items()]
-
-    # 用例开始执行
-    log.info(f"执行用例: {func_name} <{info.get('desc')}>")
 
     # 返回一个执行器实例
-    return Executor(request.config, data.get("steps"))
+    return Executor(request, record_property)
