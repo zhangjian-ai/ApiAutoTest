@@ -7,5 +7,5 @@ from utils.common import rewrite
 @pytest.mark.DAILY
 @rewrite()
 def test_demo_01():
-  """演示用例"""
-  pass
+    """演示用例"""
+    pass
