@@ -9,7 +9,15 @@ default:
   username:
   password:
   branch: "master"
-  recipients: "123@qq.com"
+
+  # 邮件配置
+  email_sender: ""
+  email_receiver: ""
+  from_name: ""
+  subject: ""
+  email_password: ""
+  smtp_server: ""
+  ssl_port: ""
 
 # 下面两个配置 就是 env 使用的特定配置
 uat:

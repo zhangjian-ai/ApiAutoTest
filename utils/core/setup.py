@@ -30,6 +30,7 @@ class InterfaceManager:
             data = deepcopy(self.api[item])
 
             # 这里处理api。比如：绑定 host、port；添加 cookie、header 等
+            data["url"] = f"{self.config.getoption('host')}:{self.config.getoption('port')}{data['url']}"
 
             return data
 

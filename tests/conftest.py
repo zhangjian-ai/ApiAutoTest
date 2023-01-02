@@ -4,7 +4,7 @@ import xdist
 from copy import deepcopy
 
 from utils.common.report import *
-from utils.common import load_yaml, REPORT, mail_instance, send_mail, CONF_DIR
+from utils.common import load_yaml, REPORT, Mail, CONF_DIR
 from utils.core import InterfaceManager, Executor
 
 
@@ -45,8 +45,15 @@ def pytest_sessionstart(session):
     创建Session对象后调用的Hook
     config对象配置为session的属性
     """
-    # 测试进程启动时间
-    session.session_start = time.strftime('%Y-%m-%d %H:%M:%S')
+
+    # 测试报告增加元数据
+    metadata = session.config._metadata
+    metadata.clear()
+    metadata["项目名称"] = "接口自动化测试"
+    metadata["项目名称"] = time.strftime('%Y-%m-%d %H:%M:%S')
+
+    # 会话级别的前置可在此处执行
+    # come baby
 
 
 def pytest_generate_tests(metafunc):
@@ -68,6 +75,8 @@ def pytest_generate_tests(metafunc):
 
     # 参数化逻辑
     if parameters:
+        # 参数值处理
+        Executor.parameter_replace(parameters)
         # ids
         ids = parameters.get("ids")
         # 将参数拆分成参数化对象
@@ -96,7 +105,7 @@ def pytest_generate_tests(metafunc):
         if fixture in ('executor',):
             metafunc.parametrize(argnames=fixture,
                                  argvalues=items,
-                                 ids=ids or [data["info"]["description"]] * len(items),
+                                 ids=ids or [data["info"]["desc"]] * len(items),
                                  indirect=True)
 
 
@@ -146,10 +155,9 @@ def pytest_sessionfinish(session, exitstatus):
         # 测试报告也仅在主节点发送一次
         if os.path.exists(REPORT):
             with open(REPORT, "r") as f:
-                title = f"测试报告"
-                recipients = session.config.getoption("recipients")
-                email_instance = mail_instance(f.read(), recipients, title, [REPORT])
-                send_mail(email_instance)
+                Mail.config = session.config
+                subject = "测试报告"
+                Mail.send_mail(content=f.read(), subject=subject, annex_files=[REPORT])
 
         # 分布式测试时，在主节点执行数据清理逻辑
         log.info("清理测试数据")

@@ -1,4 +1,4 @@
-demo:
+test_demo_01:
   spec:
     marks: [ "SMOKE","DAILY" ]
   info:

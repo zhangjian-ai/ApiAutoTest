@@ -86,8 +86,7 @@ class Executor(metaclass=Singleton):
                     for key in keys:
                         args[key] = param[key][i]
                     item = deepcopy(step)
-                    self.step_args = args
-                    self._step_replace_(item)
+                    item["step_args"] = args
                     target_steps.append(item)
             else:
                 target_steps.append(step)
@@ -96,6 +95,13 @@ class Executor(metaclass=Singleton):
         for idx, step in enumerate(target_steps):
             # 获取接口信息
             api = getattr(self.im, step.get("api"))
+
+            # 处理步骤模版参数
+            self.step_args = step.pop("step_args", {})
+            self._replace_(self.step_args)
+            self._step_replace_(step)
+
+            # 处理其他模版参数
             self._replace_(step)
 
             # 打印用户自定义日志
@@ -151,7 +157,7 @@ class Executor(metaclass=Singleton):
             sign = data.pop("sign", None)
 
             for key, val in data.items():
-                if isinstance(val, int):
+                if isinstance(val, (int, float)):
                     continue
                 elif isinstance(val, str):
                     # 替换规则前提是val是一个字符串
@@ -161,13 +167,16 @@ class Executor(metaclass=Singleton):
                     self._replace_(val)
 
             # 处理签名
-            if sign:
-                self.factory['data'] = data
-                data["sign"] = self._magic_(sign)
+            if sign is not None:
+                if isinstance(sign, str):
+                    self.factory['data'] = data
+                    data["sign"] = self._magic_(sign)
+                else:
+                    data["sign"] = sign
 
         elif isinstance(data, list):
             for idx, val in enumerate(data):
-                if isinstance(val, int):
+                if isinstance(val, (int, float)):
                     continue
                 elif isinstance(val, str):
                     data[idx] = self._magic_(val)
@@ -240,7 +249,7 @@ class Executor(metaclass=Singleton):
 
         if isinstance(data, dict):
             for key, val in data.items():
-                if isinstance(val, int):
+                if isinstance(val, (int, float)):
                     continue
                 elif isinstance(val, str):
                     data[key] = self._step_magic_(val)
@@ -248,13 +257,14 @@ class Executor(metaclass=Singleton):
                     self._step_replace_(val)
         elif isinstance(data, list):
             for idx, val in enumerate(data):
-                if isinstance(val, int):
+                if isinstance(val, (int, float)):
                     continue
                 elif isinstance(val, str):
                     data[idx] = self._step_magic_(val)
                 else:
                     self._step_replace_(val)
         else:
+
             pytest.fail(f"动态替换方法入参类型错误: {type(data)}， 默认只接受 LIST、DICT")
 
     def _step_magic_(self, origin: str) -> str:
@@ -284,7 +294,7 @@ class Executor(metaclass=Singleton):
         """
         if isinstance(data, dict):
             for key, val in data.items():
-                if isinstance(val, int):
+                if isinstance(val, (int, float)):
                     continue
                 elif isinstance(val, str):
                     data[key] = Executor.factory_magic(val)
@@ -293,7 +303,7 @@ class Executor(metaclass=Singleton):
 
         elif isinstance(data, list):
             for idx, val in enumerate(data):
-                if isinstance(val, int):
+                if isinstance(val, (int, float)):
                     continue
                 elif isinstance(val, str):
                     data[idx] = Executor.factory_magic(val)
@@ -316,3 +326,13 @@ class Executor(metaclass=Singleton):
             origin = origin.replace(f"!<{func}>", str(val))
 
         return origin
+
+    @staticmethod
+    def parameter_replace(data: dict):
+        """
+        针对用例参数化做特殊处理
+        参数的key可以是一个str，满足模版的工厂方法
+        """
+        for key, val in data.items():
+            if isinstance(val, str) and val.startswith("!<") and val.endswith(">"):
+                data[key] = Executor.factory_magic(val)
