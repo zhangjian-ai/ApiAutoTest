@@ -44,14 +44,6 @@ class Executor(metaclass=Singleton):
         """
         用例开始前的审查工作
         """
-        # 绑定用例信息
-        info = deepcopy(self.data.get("info", {}))
-        self._replace_(info)
-        [self.record_property(key, val) for key, val in info.items()]
-
-        # 用例开始执行
-        log.info(f"执行用例: {self.func} <{info.get('description')}>")
-
         # 判断skip
         spec = deepcopy(self.data.get("spec", {}))
         self._replace_(spec)
@@ -59,6 +51,18 @@ class Executor(metaclass=Singleton):
         if self.config.getoption("branch") in skips:
             log.warning(f"分支<{self.config.getoption('branch')}> 已限制用例 <{self.func}> 不执行")
             pytest.skip(f"分支<{self.config.getoption('branch')}> 已限制用例 <{self.func}> 不执行")
+
+        # 绑定用例信息
+        info = deepcopy(self.data.get("info", {}))
+        self._replace_(info)
+
+        if self.args:
+            info["params"] = self.args
+
+        [self.record_property(key, val) for key, val in info.items()]
+
+        # 用例开始执行
+        log.info(f"执行用例: {self.func} <{info.get('description')}>")
 
     def schedule(self):
         """

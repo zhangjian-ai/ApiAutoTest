@@ -48,12 +48,38 @@ def pytest_html_results_table_row(report, cells):
 
     if report:
         try:
+            # 用例名称，处理报告中文乱码，skipped用例不做处理
+            if "Skipped" not in cells[0]:
+                text = cells.pop(1).pop().encode("raw_unicode_escape").decode("utf-8")
+                cells.insert(1, html.td(html.span(text, style_="color: saddlebrown")))
+
+            # 测试时长
+            cells.insert(2, html.td(html.span(cells.pop(2).pop(), style_="color: black")))
+
+            # 自定义列
             properties = dict(report.user_properties)
-            cells.insert(3, html.td(time.strftime('%Y-%m-%d %H:%M:%S'), class_='col-time'))
-            cells.insert(4, html.td(properties.get('desc', "")))
-            cells.insert(5, html.td(properties.get('author', "")))
-            cells.insert(6, html.td(properties.get('level', "")))
-            cells.insert(7, html.td(properties.get('time', "")))
+            cells.insert(3, html.td(html.p(time.strftime('%m-%d %H:%M:%S'), class_='col-time')))
+
+            # 用例说明
+            desc_td = html.td()
+            desc_td.insert(0, html.p(properties.get('description', ""),
+                                     style_="font-weight: 400; color: black; margin: 0"))
+
+            if properties.get('params'):
+                for key, val in properties.get('params').items():
+                    div = html.div()
+                    div.append(html.span(f"| {key} : ", style_="color: green"))
+                    div.append(html.span(val, style_="color: peru"))
+
+                    desc_td.append(div)
+
+            cells.insert(4, desc_td)
+
+            # 其他信息
+            cells.insert(5, html.td(html.span(properties.get('author', ""), style_="color: black")))
+            cells.insert(6, html.td(html.span(properties.get('level', ""), style_="color: black")))
+            cells.insert(7, html.td(html.span(properties.get('update', ""), style_="color: black")))
+
         except Exception as e:
             log.error(str(e))
 

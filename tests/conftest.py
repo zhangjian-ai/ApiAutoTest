@@ -66,19 +66,18 @@ def pytest_generate_tests(metafunc):
     path = os.path.dirname(full).replace("tests", "data", 1)
 
     case_name = metafunc.function.__name__
+    config = metafunc.config
 
     # 获取用例数据
     data = load_yaml(os.path.join(path, file)).get(case_name)
     parameters = data.pop("param", None)
-    ids = None
     items = []
 
     # 参数化逻辑
     if parameters:
         # 参数值处理
         Executor.parameter_replace(parameters)
-        # ids
-        ids = parameters.get("ids")
+
         # 将参数拆分成参数化对象
         keys = [key for key in parameters.keys()]
         # 将所有非列表值修正为列表
@@ -99,14 +98,19 @@ def pytest_generate_tests(metafunc):
     # 用例使用到的夹具
     fixtures = metafunc.definition._fixtureinfo.argnames
 
+    # 构建ids
+    ids = []
+    if len(items) > 1:
+        for idx, item in enumerate(items):
+            ids.append(f"{item['info']['description']} - {idx}")
+    else:
+        ids.append(f"{items[0]['info']['description']}")
+
     # 夹具参数化
     for fixture in fixtures:
         # 维护需要参数化的夹具
         if fixture in ('executor',):
-            metafunc.parametrize(argnames=fixture,
-                                 argvalues=items,
-                                 ids=ids or [data["info"]["desc"]] * len(items),
-                                 indirect=True)
+            metafunc.parametrize(argnames=fixture, argvalues=items, ids=ids, indirect=True)
 
 
 @pytest.hookimpl(hookwrapper=True)
