@@ -20,14 +20,18 @@ class Mail:
     @classmethod
     def send_mail(cls, content, subject, annex_files: list = None):
         # 参数处理，部分默认值需要填写
-        smtp_server = cls.config.getoption("smtp_server") or 'smtp.exmail.qq.com'
-        ssl_port = cls.config.getoption("ssl_port") or '465'
-        sender_name = cls.config.getoption("from_name") or '自动化测试'
-        from_addr = cls.config.getoption("email_sender") or ''
-        password = cls.config.getoption("email_password") or ''
+        smtp_server = cls.config.getoption("smtp_server")
+        ssl_port = cls.config.getoption("ssl_port")
+        sender_name = cls.config.getoption("from_name")
+        from_addr = cls.config.getoption("email_sender")
+        password = cls.config.getoption("email_password")
 
         subject = cls.config.getoption("subject") or subject
-        recipients = cls.config.getoption("email_receiver") or ''
+        recipients = cls.config.getoption("email_receiver")
+
+        if not all([smtp_server, ssl_port, sender_name, from_addr, password, recipients, subject]):
+            log.warning("邮件参数配置缺失，测试报告已保存到 report 目录。")
+            return
 
         try:
             # 链接邮件服务器

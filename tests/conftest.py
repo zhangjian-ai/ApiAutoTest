@@ -4,7 +4,7 @@ import xdist
 from copy import deepcopy
 
 from utils.common.report import *
-from utils.common import load_yaml, REPORT, Mail, CONF_DIR
+from utils.common import load_yaml, REPORT, Mail, CONF_DIR, Magic
 from utils.core import InterfaceManager, Executor
 
 
@@ -50,7 +50,7 @@ def pytest_sessionstart(session):
     metadata = session.config._metadata
     metadata.clear()
     metadata["项目名称"] = "接口自动化测试"
-    metadata["项目名称"] = time.strftime('%Y-%m-%d %H:%M:%S')
+    metadata["测试时间"] = time.strftime('%Y-%m-%d %H:%M:%S')
 
     # 会话级别的前置可在此处执行
     # come baby
@@ -66,7 +66,6 @@ def pytest_generate_tests(metafunc):
     path = os.path.dirname(full).replace("tests", "data", 1)
 
     case_name = metafunc.function.__name__
-    config = metafunc.config
 
     # 获取用例数据
     data = load_yaml(os.path.join(path, file)).get(case_name)
@@ -76,7 +75,7 @@ def pytest_generate_tests(metafunc):
     # 参数化逻辑
     if parameters:
         # 参数值处理
-        Executor.parameter_replace(parameters)
+        Magic.trans_parameters(parameters)
 
         # 将参数拆分成参数化对象
         keys = [key for key in parameters.keys()]
@@ -102,9 +101,9 @@ def pytest_generate_tests(metafunc):
     ids = []
     if len(items) > 1:
         for idx, item in enumerate(items):
-            ids.append(f"{item['info']['description']} - {idx}")
+            ids.append(f"{item['meta']['desc']} - {idx}")
     else:
-        ids.append(f"{items[0]['info']['description']}")
+        ids.append(f"{items[0]['meta']['desc']}")
 
     # 夹具参数化
     for fixture in fixtures:

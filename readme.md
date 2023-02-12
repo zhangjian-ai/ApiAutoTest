@@ -15,7 +15,7 @@
      method: "GET"
    ```
 
-2. 新增 用例(可以通过build工具直接构建)
+2. 新增 用例(可以通过debug工具直接构建)
 
    所有用例都规划到 tests 目录下，可以根据业务模块再细分文件夹
 
@@ -27,7 +27,7 @@
    from utils.common import rewrite
    
    
-   @pytest.mark.DAILY                   # 1、用例mark
+   @pytest.mark.daily                   # 1、用例mark
    @rewrite()                           # 2、这个装饰器一定要写
    def test_demo_01():
        """演示用例"""                     # 3、用例描述信息，在 测试数据还会再写一次，这里写出来只是为了方便理解
@@ -36,140 +36,179 @@
 
 3. 用例数据
 
-   1. 所有测试数据都规划到 data 目录下;
-   2. 模版符号均是 英文符号;
-   3. 模版语法都必须放在字符串中，可以使用 多个 模版，但不支持随意嵌套使用;
-   4. 同时 step 级别的参数化，仅在当前 step 有效;
-   5. 如果确实需要将其他函数返回值或者关联值作为参数传递给当前step中的模版函数，则需要将传入的函数通过step级别的参数再引用一次，详见示例
+   > data 目录下的目录结构应该和 tests 下的目录结构完全一致，且 一个 .py 文件对应一个 .yaml 配置文件，一个 测试函数 对应到 yaml 中的一个key
 
-   > 四个模版语法：
-   >
-   >
-   > 1. 动态数据替换
-   >
-   >    ```yaml
-   >    # 语法
-   >    !<表达式>
-   >
-   >    # 示例
-   >    !<Fabricate.random_text('?')>
-   >
-   >    # 说明
-   >    1、框架会到factory模块中去找 Fabricate 类，并调用类中的 random_text 方法。这里 调用方法和在代码中一样，是可以直接传递参数的。
-   >    2、Fabricate 类，在同一个用例中，相同方法相同入参，多次调用时，在当前用例返回相同数据。其他 类 也可通过配置实现该功能。
-   >    ```
-   >
-   > 2. 关联数据替换（从该接口之前调用的接口响应中获取某个值）
-   >
-   >    ```yaml
-   >    # 语法
-   >    @<索引,jsonpath表达式>
-   >       
-   >    # 示例
-   >    @<0,$.data[0].id>
-   >       
-   >    # 说明
-   >    0 : 就是该用例的已经完成请求多个接口中的第一个接口响应结果中去匹配，索引值从 0 开始
-   >    $.data[0].id : 这就是一个 jsonpath 表达式，用于定位到我们的目标数据
-   >    ```
-   >    
-   > 3. 用例参数化
-   >
-   >    ```yaml
-   >    # 语法
-   >    %<参数的KEY>
-   >
-   >    # 示例
-   >    %<ids>
-   >
-   >    # 说明
-   >    参数化模版中的key，必须要是实现配置好的。即在param字段中，配置了这样的键。示例中就要求 用例的 param 中配置 ids。
-   >    
-   >    ```
-   >    
-   > 4. step 参数化
-   >
-   >    ```yaml
-   >    # 语法
-   >    ~<step参数的KEY>
-   >
-   >    # 示例
-   >    ~<names>
-   >
-   >    # 说明
-   >    参数化模版中的key，必须要是实现配置好的。即在param字段中，配置了这样的键。示例中就要求 当前step的 param 中配置 names；
-   >    step 级别的模版由于作用域的关系，可以放到 其他模版 内部使用
-   >    
-   >    ```
+   - 所有测试数据都规划到 data 目录下
+   - 模版语法都必须放在字符串中，可以使用 多个 模版，但**不能嵌套**
+   - 在用例和steps中都可以增加param字段来表示参数化（使用过程见示例）
+   - step 级别的参数化，参数仅在当前 step 有效
+   - 参数化的key，可在模版语法中直接当做变量使用
+   - r对象。框架为每个用例提供一个r对象列表，后面的接口可通过`r[i]`的方式获取前面对象的返回值
+   - factory 目录，里面用来存放自定义的类和方法，以动态构造数据
 
-   **注意：data 目录下的目录结构应该和 tests 下的目录结构完全一致，且 一个 .py 文件对应一个 .yaml 配置文件，一个 测试函数 对应到 yaml 中的一个key**
+   - **模版语法：**
+     模版语法的作用就是为了动态的获取、关联数据而规定的一种写作格式。
 
-   ```yaml
-   # 文件名: test_demo.yaml  (和测试文件同名，仅后缀不一样)
-   
-   # 演示用例
-   test_demo_01:                                            # 1、和测试函数同名的 key，它的内容就是一个测试用例需要的全部信息
-     spec:
-       marks: [ "SMOKE","DAILY" ]
-     info:                                                  # 4、用例信息
-       desc: "演示用例"
-       author: "xz"
-       level: "p1"
-       time: "2022.10.05"
-     steps: [                                               # 5、测试步骤，里面一个 {} 表示一个接口
-       {
-         api: "baidu.home",                                 
-         log: "访问主页",                            
-         request: {                                         # 7、请求数据。内部的字段同标准库 requests.request 方法的入参
-         },
-         response: {                                        # 8、预期响应对象，仅写需要验证的key，层级结构保持和响应结果一致即可
-           code: 0,
-           data: { "==": 1 }                                # 9、特殊key: "<", ">", "==", ">=", "<=", "!=" 比较运算，这里表示返回值小于1
-         }
-       },
-       {
-         api: "baidu.demo",                                 # 10、这个接口仅演示部分用法，不是项目中真实的接口
-         rule: {                                            # 11、调度规则，可不写。默认接口只会调用一次并验证。针对一些要查询进度的接口有用
-           timeout: 0,                                      # 12、超时时间
-           interval: 3                                      # 13、每次调度的时间间隔(s)
-         },
-         param: {
-           code: "@<0,$.data.id>"                           # 15、关联数据替换模版
-         },
-         request: {							
-           data: {														
-             content: "!<Fabricate.random_text('?')>",     # 14、动态数据替换模版
-             code: "!<Fabricate.random_text(~<code>)>",    # 16、模版之间不能任意嵌套，可通过step参数化的方式，将其他模版返回值传递给当前模版
-             detail: {
-               type: "@<0,$.data.id>" ,                    # 17、关联数据替换模版，只要不是嵌套场景，都可直接使用模版语法
-               text: "!<Fabricate.random_text()>"
+     ```shell
+     # 语法
+     @<表达式>
+     
+     # 示例
+     @<Fab.random_text('?')>
+     
+     # 说明
+     1、框架会到factory模块中去找 Fab 类，并调用类中的 random_text 方法。这里 调用方法和在代码中一样，是可以直接传递参数的。
+     2、在同一个模版语法内，可直接使用参数化字段作为变量使用，r对象也可直接作为变量使用，只需要遵循python语法规则即可。
+     ```
+
+   - **编写示例：**
+
+     ```yaml
+     test_demo_01:
+       spec:
+         marks: [ "smoke" ]  # 用例的mark
+         skips: [ ]  # 跳过分支
+       meta:
+         desc: "演示用例"
+         author: "goodman"
+         level: "P1"
+         time: "2022.10.26"
+       steps: [
+         {
+           api: "httpbin.post",  # 接口api名称
+           desc: "演示post接口调用", # 当前步骤的描述信息
+           request: { # 请求对象和标准库http中的字段相同，这里不关心url和method
+             data: {
+               key: "豫章故郡，洪都新府",
+               val: "萍水相逢，尽是他乡之客"
+             },
+             headers: {
+               "Auth": "Copyright reserved, please purchase"
              }
+           },
+           response: { # 响应对象为接口返回的json对象。响应体中自动装配status_code；如果是文件下载接口，还会装载size和file字段
+             json: {
+               key: "豫章故郡，洪都新府",
+               val: "萍水相逢，尽是他乡之客"
+             },
+             status_code: 200
+           }
+         }
+       ]
+     
+     test_demo_02:
+       spec:
+         marks: [ "smoke" ]
+       meta:
+         desc: "参数化演示用例"
+         author: "goodman"
+         level: "P1"
+         time: "2022.10.26"
+       param: # 用例参数化，下面的参数将逐个分组拆成多个用例
+         text: "@<Fab.many_text(prefix='参数化随机文本: ', num=4, length=4)>"
+         answer: [ '其疾如风', '其徐如林', '侵掠如火', '不动如山' ]  # text 参数经转化后会有4个值，所以这里也需要四个值
+     
+       steps: [
+         {
+           api: "httpbin.post",
+           desc: "参数化演示 - @<answer>",  # 描述信息中也可以使用参数化中的变量
+           param: { # 步骤参数化，有几组参数则该步骤执行几轮。注意：如果步骤参数化字段和用例参数化字段同名，那么在后续使用中前者将覆盖后者
+             text: [ '第一次执行: @<text>', '第二次执行: @<text>' ],
+             name: [ '@<answer>', '@<Fab.to_name(answer)>' ]
+           },
+           request: {
+             data: {
+               key: "@<text>",
+               val: "@<name>"
+             }
+           },
+           response: {
+             status_code: 200
+           }
+         }
+       ]
+     
+     test_demo_03:
+       spec:
+         marks: [ "smoke" ]
+         skips: [ ]
+       meta:
+         desc: "演示用例"
+         author: "goodman"
+         level: "P1"
+         time: "2022.10.26"
+       steps: [
+         {
+           api: "httpbin.post",
+           desc: "演示post接口调用",
+           request: {
+             data: {
+               key: "score",
+               val: [ 99, 100, 98, 89 ]
+             },
+             headers: {
+               "Auth": "Copyright reserved, please purchase"
+             }
+           },
+           response: {
+             json: {
+               key: "score",
+               val: [ 99, 100, 98, 89 ]
+             },
+             status_code: 200
            }
          },
-         response: {
-           code: 0,
-           message: "success",
-           status_code: 200                                # 18、当需要验证响应code的时候，像这样写到第一层级即可
+         {
+           api: "httpbin.post",
+           desc: "演示post接口调用",
+           request: {
+             data: {
+               score: "score",
+               val: "@<r[0]['json']['val']>"  # 通过r对象加下标，来获取当前用例第0次请求的响应结果中的值
+             },
+             headers: {
+               "Auth": "Copyright reserved, please purchase"
+             }
+           },
+           response: {
+             json: {
+               score: "score",
+               val: {  # 这里使用逻辑比较检验结果，如果是列表检验长度，如果是字符串数字等直接比较大小
+                 ">": 2,  # 检验返回值是否大于2
+                 "==": 4,  # 检验是否等于4
+                 "not in": 101  # 检验返回值是否包含 101 这一项
+               }
+             },
+             status_code: 200
+           }
          }
-       }
-     ]
-   ```
+       ]
+     ```
 
-4. 使用 build.py
+     
+
+4. 使用 debug.py
 
    ```python
+   #########################################
+   ############ Automation Test ############
+   #########################################
+   
    if __name__ == '__main__':
-       # yaml文件路径。相对项目根目录的路径
-       yaml_path = ""
+       from utils.common import debug
+   
+       # 测试用例数据文件的路径
+       yaml_path = "data/demo/test_demo.yaml"
    
        # 用例名称
-       case_name = ""
+       case_name = "test_demo_02"
    
        # 是否调试，调试模式下不会构建case
-       debug = 1
+       # 0/1
+       flag = 1
    
-       manage(yaml_path, case_name, debug)
+       debug(yaml_path, case_name, flag)
    ```
-
+   
    
 

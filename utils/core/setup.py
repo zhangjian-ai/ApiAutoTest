@@ -41,18 +41,32 @@ class InterfaceManager:
         self.config = config
         self.apis = {}
 
-        # 加载接口配置
-        root, _, files = os.walk(API_DIR).__next__()
+        # 加载接口配置，api 文件夹中每个目录表示一个服务
+        root, dirs, _ = os.walk(API_DIR).__next__()
 
-        for file in files:
-            if not file.endswith(".yaml") and not file.endswith(".yml"):
-                continue
+        # 遍历每个项目
+        for d in dirs:
+            api = {}
+            ds = [os.path.join(root, d)]
 
-            # 主站名字
-            name = file.split(".", 1)[0]
+            while len(ds) > 0:
+                cur = ds.pop(0)
 
-            # 每个主站对应一个interface实例
-            self.apis[name] = InterfaceManager.Interface(name, load_yaml(os.path.join(API_DIR, file)), config)
+                abs_path, sub_dirs, files = os.walk(cur).__next__()
+
+                # 处理当前文件夹的文件
+                for file in files:
+                    if not file.endswith(".yaml") and not file.endswith(".yml"):
+                        continue
+
+                    api.update(load_yaml(os.path.join(abs_path, file)))
+
+                # 处理子目录
+                for sub in sub_dirs:
+                    ds.append(os.path.join(abs_path, sub))
+
+            # 每个服务对应一个interface实例
+            self.apis[d] = InterfaceManager.Interface(d, api, config)
 
     def __getattribute__(self, item):
         if item in ["config", "apis"]:
@@ -70,4 +84,3 @@ class InterfaceManager:
             raise RuntimeError(f"{name}.yaml: 没有这样的接口文档")
 
         return getattr(self.apis[name], api_name)
-

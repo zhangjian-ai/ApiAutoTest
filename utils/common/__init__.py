@@ -5,3 +5,5 @@ from .decorators import retry, rewrite
 from .singleton import Singleton
 from .mail import Mail
 from .execute import http_request, verify
+from .magic import Magic
+from .build import debug

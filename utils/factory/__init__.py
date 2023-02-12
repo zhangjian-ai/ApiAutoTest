@@ -1,1 +1,1 @@
-from .fabricate import Fabricate
+from .fabricate import Fab

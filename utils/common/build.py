@@ -5,9 +5,9 @@ import pytest
 from utils.common import BASE_DIR, load_yaml
 
 
-def manage(yaml_path, case_name, debug):
+def debug(yaml_path, case_name, debug_flag):
     """
-    逻辑分流
+    调试工具
     """
     # 检查yaml是否存在
     if not os.path.exists(os.path.join(BASE_DIR, yaml_path)):
@@ -22,7 +22,7 @@ def manage(yaml_path, case_name, debug):
     py_path = os.path.join(dirname, basename)
 
     # 是否调试
-    if debug:
+    if debug_flag:
         cmd = py_path
         if case_name:
             cmd += f"::{case_name}"
@@ -57,7 +57,7 @@ def manage(yaml_path, case_name, debug):
         if case_name not in content:
             temp = cases[case_name]["spec"]
             temp["name"] = case_name
-            temp["desc"] = cases[case_name]["info"]["desc"]
+            temp["desc"] = cases[case_name]["meta"]["desc"]
 
             str_list.append(build_case(temp))
 
@@ -68,7 +68,7 @@ def manage(yaml_path, case_name, debug):
         for key, case in cases.items():
             temp = case["spec"]
             temp["name"] = key
-            temp["desc"] = case["info"]["desc"]
+            temp["desc"] = case["meta"]["desc"]
 
             keys.append(key)
             str_list.append(build_case(temp))
@@ -109,17 +109,3 @@ def build_case(case) -> str:
     string += f'@rewrite()\ndef {case.get("name")}():\n    """{case.get("desc")}"""\n    pass\n\n\n'
 
     return string
-
-
-if __name__ == '__main__':
-    # yaml文件路径。相对项目根目录的路径
-    yaml_path = ""
-
-    # 用例名称
-    case_name = ""
-
-    # 是否调试，调试模式下不会构建case
-    # 0/1
-    debug = 1
-
-    manage(yaml_path, case_name, debug)

@@ -1,18 +1,118 @@
 test_demo_01:
   spec:
-    marks: [ "SMOKE","DAILY" ]
-  info:
+    marks: [ "smoke" ]  # 用例的mark
+    skips: [ ]  # 跳过分支
+  meta:
     desc: "演示用例"
-    author: "xz"
-    level: "p1"
+    author: "goodman"
+    level: "P1"
     time: "2022.10.26"
   steps: [
     {
-      api: "baidu.home",
-      log: "访问百度首页",
+      api: "httpbin.post",  # 接口api名称
+      desc: "演示post接口调用", # 当前步骤的描述信息
+      request: { # 请求对象和标准库http中的字段相同，这里不关心url和method
+        data: {
+          key: "豫章故郡，洪都新府",
+          val: "萍水相逢，尽是他乡之客"
+        },
+        headers: {
+          "Auth": "Copyright reserved, please purchase"
+        }
+      },
+      response: { # 响应对象为接口返回的json对象。响应体中自动装配status_code；如果是文件下载接口，还会装载size和file字段
+        json: {
+          key: "豫章故郡，洪都新府",
+          val: "萍水相逢，尽是他乡之客"
+        },
+        status_code: 200
+      }
+    }
+  ]
+
+test_demo_02:
+  spec:
+    marks: [ "smoke" ]
+  meta:
+    desc: "参数化演示用例"
+    author: "goodman"
+    level: "P1"
+    time: "2022.10.26"
+  param: # 用例参数化，下面的参数将逐个分组拆成多个用例
+    text: "@<Fab.many_text(prefix='参数化随机文本: ', num=4, length=4)>"
+    answer: [ '其疾如风', '其徐如林', '侵掠如火', '不动如山' ]  # text 参数经转化后会有4个值，所以这里也需要四个值
+
+  steps: [
+    {
+      api: "httpbin.post",
+      desc: "参数化演示 - @<answer>",  # 描述信息中也可以使用参数化中的变量
+      param: { # 步骤参数化，有几组参数则该步骤执行几轮。注意：如果步骤参数化字段和用例参数化字段同名，那么在后续使用中前者将覆盖后者
+        text: [ '第一次执行: @<text>', '第二次执行: @<text>' ],
+        name: [ '@<answer>', '@<Fab.to_name(answer)>' ]
+      },
       request: {
+        data: {
+          key: "@<text>",
+          val: "@<name>"
+        }
       },
       response: {
+        status_code: 200
+      }
+    }
+  ]
+
+test_demo_03:
+  spec:
+    marks: [ "smoke" ]
+    skips: [ ]
+  meta:
+    desc: "演示用例"
+    author: "goodman"
+    level: "P1"
+    time: "2022.10.26"
+  steps: [
+    {
+      api: "httpbin.post",
+      desc: "演示post接口调用",
+      request: {
+        data: {
+          key: "score",
+          val: [ 99, 100, 98, 89 ]
+        },
+        headers: {
+          "Auth": "Copyright reserved, please purchase"
+        }
+      },
+      response: {
+        json: {
+          key: "score",
+          val: [ 99, 100, 98, 89 ]
+        },
+        status_code: 200
+      }
+    },
+    {
+      api: "httpbin.post",
+      desc: "演示post接口调用",
+      request: {
+        data: {
+          score: "score",
+          val: "@<r[0]['json']['val']>"  # 通过r对象加下标，来获取当前用例第0次请求的响应结果中的值
+        },
+        headers: {
+          "Auth": "Copyright reserved, please purchase"
+        }
+      },
+      response: {
+        json: {
+          score: "score",
+          val: {  # 这里使用逻辑比较检验结果，如果是列表检验长度，如果是字符串数字等直接比较大小
+            ">": 2,  # 检验返回值是否大于2
+            "==": 4,  # 检验是否等于4
+            "not in": 100  # 检验返回值是否包含 100 这一项，这里校验会失败。错误日志可见测试报告 report/report.html
+          }
+        },
         status_code: 200
       }
     }

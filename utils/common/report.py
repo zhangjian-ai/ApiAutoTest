@@ -38,7 +38,7 @@ def pytest_html_results_table_header(cells):
     cells.insert(4, html.th('用例描述'))
     cells.insert(5, html.th("作者"))
     cells.insert(6, html.th("用例等级"))
-    cells.insert(7, html.th("编辑时间"))
+    cells.insert(7, html.th("更新时间"))
 
 
 @pytest.mark.optionalhook
@@ -62,7 +62,7 @@ def pytest_html_results_table_row(report, cells):
 
             # 用例说明
             desc_td = html.td()
-            desc_td.insert(0, html.p(properties.get('description', ""),
+            desc_td.insert(0, html.p(properties.get('desc', ""),
                                      style_="font-weight: 400; color: black; margin: 0"))
 
             if properties.get('params'):
@@ -78,7 +78,7 @@ def pytest_html_results_table_row(report, cells):
             # 其他信息
             cells.insert(5, html.td(html.span(properties.get('author', ""), style_="color: black")))
             cells.insert(6, html.td(html.span(properties.get('level', ""), style_="color: black")))
-            cells.insert(7, html.td(html.span(properties.get('update', ""), style_="color: black")))
+            cells.insert(7, html.td(html.span(properties.get('time', ""), style_="color: black")))
 
         except Exception as e:
             log.error(str(e))
@@ -88,6 +88,5 @@ def pytest_html_results_table_row(report, cells):
 def pytest_html_results_table_html(report, data):
     # 通过的用例不记录日志
     if report.passed:
-        pass
         data.clear()
         data.append(html.div("we will not record log for passed case.", class_="empty log"))

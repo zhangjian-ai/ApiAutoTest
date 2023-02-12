@@ -1,0 +1,9 @@
+# 接口文档
+
+post:
+  method: "POST"
+  url: "/post"
+
+get:
+  method: "GET"
+  url: "/get"

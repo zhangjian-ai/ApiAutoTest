@@ -19,13 +19,6 @@ def http_request(method="POST", url=None, data=None, params=None, headers=None, 
     """
     二次封装 http request 方法
     """
-    # 日志打印
-    if detail:
-        log.info(f'请求地址: {url}')
-        log.info(f'请求方式: {method}')
-        log.info(f'请求头: {headers}')
-        log.info(f'查询参数: {params}')
-        log.info(f'表单参数: {data}')
 
     # 为POST请求处理Content-Type
     if method.upper() == "POST":
@@ -35,8 +28,17 @@ def http_request(method="POST", url=None, data=None, params=None, headers=None, 
         if "Content-Type" not in headers:
             headers["Content-Type"] = "application/json"
 
-        if 'json' in headers.get("Content-Type"):
-            data = json.dumps(data)
+    # 日志打印
+    if detail:
+        log.info(f'请求地址: {url}')
+        log.info(f'请求方式: {method}')
+        log.info(f'请求头: {headers}')
+        log.info(f'查询参数: {params}')
+        log.info(f'表单参数: {data}')
+
+    # 处理data数据
+    if data and method.upper() == "POST" and 'json' in headers.get("Content-Type"):
+        data = json.dumps(data)
 
     try:
         response = requests.request(method, url, data=data, params=params, headers=headers, cookies=cookies)
@@ -70,7 +72,7 @@ def http_request(method="POST", url=None, data=None, params=None, headers=None, 
 
             # 为结果增加 content、file 字段
             # content 记录二进制长度
-            res["content"] = len(response.content)
+            res["size"] = len(response.content)
             res["file"] = file
 
         if detail:
@@ -122,7 +124,7 @@ def verify(expect: dict, response: dict):
             else:
                 assert eval(f"{value} {key} {response}"), f'\n' \
                                                           f'KEY: {key} \n' \
-                                                          f'运算符: {key} ' \
+                                                          f'运算符: {key} \n' \
                                                           f'预期值: {value}\n' \
                                                           f'实际值: {response}\n' \
                                                           f'包含关系运算结果不为真'
