@@ -76,11 +76,11 @@ class InterfaceManager:
         variables = item.split(".")
 
         if len(variables) == 2:
-            name, api_name = variables
+            service, api_name = variables
         else:
             raise RuntimeError(f"非法的api，请检查本用例的 api 字段")
 
-        if name not in self.apis:
-            raise RuntimeError(f"{name}.yaml: 没有这样的接口文档")
+        if service not in self.apis:
+            raise RuntimeError(f"{service}: 没有这样的服务，请检查 api 目录")
 
-        return getattr(self.apis[name], api_name)
+        return getattr(self.apis[service], api_name)
