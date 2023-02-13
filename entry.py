@@ -17,7 +17,7 @@ parser.add_argument("--nums", default=str(multiprocessing.cpu_count() // 2), hel
 args = parser.parse_args()
 
 # 自定义参数 命令行
-# 此变量衔接 main.py 和 conftest.py 中的变量
+# 此变量衔接 entry.py 和 conftest.py 中的变量
 custom = f"--host {args.host} --port {args.port}"
 
 # pytest 命令行

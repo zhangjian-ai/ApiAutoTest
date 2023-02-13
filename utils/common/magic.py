@@ -65,13 +65,8 @@ class Magic:
         params.update(self.sp)
 
         for arg in args:
-
-            # 判断模版语法中是普通对象，还是可执行的类对象
-            if "." not in arg:
-                # 没有点号运算符说明就是普通的对象变量
-                target = eval(arg, params)
-            else:
-                target = eval(arg, dict(**self.objs, **params))
+            # 转换模版代码为真是数据值
+            target = eval(arg, dict(**self.objs, **params))
 
             if f"@<{arg}>" == origin:
                 return target

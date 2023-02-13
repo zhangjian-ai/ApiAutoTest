@@ -45,7 +45,7 @@ test_demo_02:
   steps: [
     {
       api: "httpbin.post",
-      desc: "参数化演示 - @<answer>",  # 描述信息中也可以使用参数化中的变量
+      desc: "参数化演示 - @<answer> - @<text>",  # 描述信息中也可以使用参数化中的变量
       param: { # 步骤参数化，有几组参数则该步骤执行几轮。注意：如果步骤参数化字段和用例参数化字段同名，那么在后续使用中前者将覆盖后者
         text: [ '第一次执行: @<text>', '第二次执行: @<text>' ],
         name: [ '@<answer>', '@<Fab.to_name(answer)>' ]
