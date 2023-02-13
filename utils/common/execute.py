@@ -179,10 +179,6 @@ def _verify_list(key: str, expect: list, response: list, operate: str = "in"):
     key 为预期列表expect在父级字典对应的键，传递过来主要为了打印日志
     operate 取值为 in、not in 用于表示包含和不包含的关系
     """
-    assert isinstance(response, list), f'\n' \
-                                       f'预期结果: {json.dumps(expect, indent=2, ensure_ascii=False)}\n' \
-                                       f'实际结果: {json.dumps(response, indent=2, ensure_ascii=False)}\n' \
-                                       f"响应对象实际类型是: {type(response)}，预期类型是 LIST\n"
 
     # 检查实际值的类型
     assert isinstance(response, (list, tuple)), f'\n' \
