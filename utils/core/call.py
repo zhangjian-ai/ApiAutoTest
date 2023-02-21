@@ -20,7 +20,7 @@ class Executor(metaclass=Singleton):
         self.func = request.function.__name__
         self.record_property = record_property
 
-        # 工厂数据
+        # 神奇魔法
         self.magic = Magic()
 
         # 用例 参数化变量，转换之后赋值给magic

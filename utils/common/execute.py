@@ -1,9 +1,3 @@
-"""
-@Project: bot3-env-verify
-@File: execute.py
-@Author: Seeker
-@Date: 2022/10/26 7:16 下午
-"""
 import os
 import json
 
@@ -52,13 +46,10 @@ def http_request(method="POST", url=None, data=None, params=None, headers=None, 
             log.info(f'状态码: {response.status_code}')
 
         if res:
-            if detail:
-                log.info(f'响应结果: {res}')
             res["status_code"] = response.status_code
-            return res
-
-        # response.json() 解析异常时，单独构建响应结果
-        res = {"status_code": response.status_code}
+        else:
+            # response.json() 解析异常时，单独构建响应结果
+            res = {"status_code": response.status_code}
 
         # 检查是否是文件下载接口
         if "Content-Disposition" in response.headers:

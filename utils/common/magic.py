@@ -1,9 +1,3 @@
-"""
-@Project: api-auto-test
-@File: magic.py
-@Author: Seeker
-@Date: 2023/2/12 1:30 下午
-"""
 import re
 
 import pytest
@@ -85,8 +79,11 @@ class Magic:
             if isinstance(val, str):
                 args = re.findall("@<(.+?)>", val)
 
-                if f"@<{args[0]}>" == val:
-                    target = eval(args[0], Magic.objs)
-
-                    if isinstance(target, (list, tuple)):
-                        data[key] = target
+                if args and f"@<{args[0]}>" == val:
+                    try:
+                        target = eval(args[0], Magic.objs)
+                    except:
+                        pass
+                    else:
+                        if isinstance(target, (list, tuple)):
+                            data[key] = target
