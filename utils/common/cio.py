@@ -31,6 +31,9 @@ def load_data(target_dir, target_case) -> dict:
 
     for cur_dir, dirs, files in os.walk(target_dir):
         for file in files:
+            if not file.startswith("test"):
+                continue
+
             abs_path = os.path.join(cur_dir, file)
             details = load_yaml(abs_path)
 
@@ -49,8 +52,8 @@ def load_data(target_dir, target_case) -> dict:
 
                 # 如果目标是单个case，则仅返回该case的数据
                 if target_case == key:
-                    data_source[key] = details[key]
-                    return data_source
+                    del data_source
+                    return {key: details[key]}
 
             data_source.update(details)
 

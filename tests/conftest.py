@@ -99,7 +99,12 @@ def pytest_generate_tests(metafunc: Metafunc):
     """
 
     # 获取用例数据
-    data = metafunc.config.data_source.get(metafunc.function.__name__)
+    case_name = metafunc.function.__name__
+    data = metafunc.config.data_source.get(case_name)
+
+    if not data:
+        raise RuntimeError(f"用例数据不存在，用例名称: {case_name}")
+
     parameters = data.pop("param", None)
     items = []
 

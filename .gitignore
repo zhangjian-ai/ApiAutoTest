@@ -5,3 +5,5 @@ venv
 .DS_Store
 # *.html
 *.pyc
+
+report/*.html

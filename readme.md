@@ -178,6 +178,6 @@
    # 调试单个文件。使用pytest命令行 --case 测试文件名称 即可，测试文件需要带后缀
    pytest --case test_demo.yaml
 
-   # 调试单个文件时同样可以使用pytest其他命令行参数
+   # 调试单个文件或用例时，同样可以使用pytest其他命令行参数
    pytest -sv --case test_demo.yaml
    ```   
