@@ -5,6 +5,9 @@ from pathlib import Path
 # 项目目录
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.__str__()
 
+# 项目名称
+PROJECT_NAME = os.path.basename(BASE_DIR)
+
 # 配置文件目录
 CONF_DIR = os.path.join(BASE_DIR, "config")
 

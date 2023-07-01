@@ -67,7 +67,7 @@ test_demo_03:
     marks: [ "smoke" ]
     skips: [ ]
   meta:
-    desc: "演示用例"
+    desc: "又一个演示用例"
     author: "goodman"
     level: "P1"
     time: "2022.10.26"

@@ -17,30 +17,9 @@
      method: "GET"
    ```
 
-2. 新增 用例(可以通过debug工具直接构建)
+2. 新增用例数据
 
-   所有用例都规划到 tests 目录下，可以根据业务模块再细分文件夹
-
-   ```python
-   # 文件名: test_demo.py
-   
-   import pytest
-   
-   from utils.common import rewrite
-   
-   
-   @pytest.mark.daily                   # 1、用例mark
-   @rewrite()                           # 2、这个装饰器一定要写
-   def test_demo_01():
-       """演示用例"""                     # 3、用例描述信息，在 测试数据还会再写一次，这里写出来只是为了方便理解
-       pass                             # 4、函数体就这样 写个 pass 就行
-   ```
-
-3. 用例数据
-
-   > data 目录下的目录结构应该和 tests 下的目录结构完全一致，且 一个 .py 文件对应一个 .yaml 配置文件，一个 测试函数 对应到 yaml 中的一个key
-
-   - 所有测试数据都规划到 data 目录下
+   - 所有用例数据都规划到 data 目录下，测试文件名称、用例名称都不应重复，否则可能引发一些奇怪的问题
    - 模版语法都必须放在字符串中，可以使用 多个 模版，但**不能嵌套**
    - 在用例和steps中都可以增加param字段来表示参数化（使用过程见示例）
    - step 级别的参数化，参数仅在当前 step 有效
@@ -187,30 +166,18 @@
        ]
      ```
 
-     
+3. 调试及运行
 
-4. 使用 debug.py
+   执行测试与pytest官方规则无异，此处不做介绍。仅对调试方法作说明
 
-   ```python
-   #########################################
-   ############ Automation Test ############
-   #########################################
+   ```shell
    
-   if __name__ == '__main__':
-       from utils.common import debug
+   # 调试单个用例。使用pytest命令行 --case 用例名称 即可
+   pytest --case test_demo_01
    
-       # 测试用例数据文件的路径
-       yaml_path = "data/demo/test_demo.yaml"
-   
-       # 用例名称
-       case_name = "test_demo_02"
-   
-       # 是否调试，调试模式下不会构建case
-       # 0/1
-       flag = 1
-   
-       debug(yaml_path, case_name, flag)
-   ```
-   
-   
+   # 调试单个文件。使用pytest命令行 --case 测试文件名称 即可，测试文件需要带后缀
+   pytest --case test_demo.yaml
 
+   # 调试单个文件时同样可以使用pytest其他命令行参数
+   pytest -sv --case test_demo.yaml
+   ```   

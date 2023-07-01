@@ -1,18 +1,31 @@
 import os
 import xdist
 
+from typing import List
 from copy import deepcopy
 
+from _pytest.config import Config
+from _pytest.config.argparsing import Parser
+from _pytest.fixtures import SubRequest
+from _pytest.main import Session
+from _pytest.nodes import Item, Collector
+from _pytest.python import Metafunc
+from _pytest.runner import CallInfo
+from py._path.local import LocalPath
+
 from utils.common.report import *
-from utils.common import load_yaml, REPORT, Mail, CONF_DIR, Magic
 from utils.core import InterfaceManager, Executor
+from utils.common import REPORT, Mail, CONF_DIR, Magic, BASE_DIR, load_data, build_func, load_yaml
 
 
-def pytest_addoption(parser):
+def pytest_addoption(parser: Parser):
     """
     命令行注册
     初始化时最先调用的Hook
     """
+    # 内置固定命令行
+    parser.addoption("--case", action="store", default=None)
+
     # 根据默认配置注册命令行
     # 根据环境信息覆盖默认配置
     full = load_yaml(os.path.join(CONF_DIR, "default.yaml"))
@@ -28,7 +41,7 @@ def pytest_addoption(parser):
         parser.addoption(f"--{key}", action="store", default=value)
 
 
-def pytest_configure(config):
+def pytest_configure(config: Config):
     """
     初始化配置，在这里配置自定义的一些属性
     此时已经可以使用上一Hook注册的命令行参数
@@ -40,7 +53,7 @@ def pytest_configure(config):
     config.im = InterfaceManager(config)
 
 
-def pytest_sessionstart(session):
+def pytest_sessionstart(session: Session):
     """
     创建Session对象后调用的Hook
     config对象配置为session的属性
@@ -56,19 +69,37 @@ def pytest_sessionstart(session):
     # come baby
 
 
-def pytest_generate_tests(metafunc):
+def pytest_pycollect_makemodule(path: LocalPath, parent: Collector):
+    """
+    pytest收集到测试模块后调用的hook函数
+    """
+    # 从入口文件开始配置测试
+    if path.purebasename == "test_entrypoint":
+
+        # 获取用例名称及其文件路径的映射关系
+        data_source = load_data(target_dir=os.path.join(BASE_DIR, "data"),
+                                target_case=parent.config.getoption("case"))
+
+        # 导入入口模块，加载用例
+        from importlib import import_module
+        module = import_module("tests.test_entrypoint")
+
+        # 构建用例
+        for key in data_source.keys():
+            setattr(module, key, build_func(key))
+
+        # 传递测试数据
+        parent.config.data_source = data_source
+
+
+def pytest_generate_tests(metafunc: Metafunc):
     """
     用例收集阶段钩子
     生成（多个）对测试函数的参数化调用
     """
-    full = metafunc.module.__file__
-    file = os.path.basename(full).replace(".py", ".yaml")
-    path = os.path.dirname(full).replace("tests", "data", 1)
-
-    case_name = metafunc.function.__name__
 
     # 获取用例数据
-    data = load_yaml(os.path.join(path, file)).get(case_name)
+    data = metafunc.config.data_source.get(metafunc.function.__name__)
     parameters = data.pop("param", None)
     items = []
 
@@ -101,9 +132,9 @@ def pytest_generate_tests(metafunc):
     ids = []
     if len(items) > 1:
         for idx, item in enumerate(items):
-            ids.append(f"{item['meta']['desc']} - {idx}")
+            ids.append(f"{item.get('meta', {}).get('desc', ' T')} - {idx}")
     else:
-        ids.append(f"{items[0]['meta']['desc']}")
+        ids.append(f"{items[0].get('meta', {}).get('desc', ' T')}")
 
     # 夹具参数化
     for fixture in fixtures:
@@ -112,8 +143,24 @@ def pytest_generate_tests(metafunc):
             metafunc.parametrize(argnames=fixture, argvalues=items, ids=ids, indirect=True)
 
 
+def pytest_collection_modifyitems(session: Session, config: Config, items: List[Item]):
+    """
+    用例参数化完成后调用的hook
+    """
+
+    # item表示每个测试用例
+    for item in items:
+        # 处理console中文显示问题
+        item.name = item.name.encode("utf-8").decode("unicode-escape")
+        item._nodeid = item._nodeid.encode("utf-8").decode("unicode-escape")
+
+        # 为item添加mark
+        for mark in config.data_source.get(item.originalname).get("spec", {}).get("marks", ""):
+            item.add_marker(mark)
+
+
 @pytest.hookimpl(hookwrapper=True)
-def pytest_runtest_makereport(item, call):
+def pytest_runtest_makereport(item: Item, call: CallInfo[None]):
     """
     根据测试结果打印用例完成的日志
     """
@@ -127,33 +174,8 @@ def pytest_runtest_makereport(item, call):
         printer(f'执行结束: {result.outcome.upper()}')
 
 
-def pytest_collection_modifyitems(session, config, items):
-    """
-    处理参数化乱码问题
-    """
-    # item表示每个测试用例，解决console中文显示问题
-    for item in items:
-        item.name = item.name.encode("utf-8").decode("unicode-escape")
-        item._nodeid = item._nodeid.encode("utf-8").decode("unicode-escape")
-
-
-@pytest.hookimpl(hookwrapper=True)
-def pytest_runtest_makereport(item, call):
-    """
-    根据测试结果打印用例完成的日志
-    """
-    out = yield
-
-    if call.when == 'call':
-        report = out.get_result()
-        flag = report.outcome
-
-        printer = getattr(log, 'info' if flag == 'passed' else 'error')
-        printer(f'执行结束: {report.outcome.upper()}')
-
-
 @pytest.hookimpl(trylast=True)
-def pytest_sessionfinish(session, exitstatus):
+def pytest_sessionfinish(session: Session, exitstatus: int):
     if xdist.is_xdist_master(session):
         # 测试报告也仅在主节点发送一次
         if os.path.exists(REPORT):
@@ -169,7 +191,7 @@ def pytest_sessionfinish(session, exitstatus):
 
 
 @pytest.fixture()
-def executor(request, record_property):
+def executor(request: SubRequest, record_property):
     """
     用例执行器
     """

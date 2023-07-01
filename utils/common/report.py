@@ -48,10 +48,6 @@ def pytest_html_results_table_row(report, cells):
 
     if report:
         try:
-            # 用例名称，处理报告中文乱码，skipped用例不做处理
-            if "Skipped" not in cells[0]:
-                text = cells.pop(1).pop().encode("raw_unicode_escape").decode("utf-8")
-                cells.insert(1, html.td(html.span(text, style_="color: saddlebrown")))
 
             # 测试时长
             cells.insert(2, html.td(html.span(cells.pop(2).pop(), style_="color: black")))
@@ -59,6 +55,15 @@ def pytest_html_results_table_row(report, cells):
             # 自定义列
             properties = dict(report.user_properties)
             cells.insert(3, html.td(html.p(time.strftime('%m-%d %H:%M:%S'), class_='col-time')))
+
+            # Test列处理
+            # 用例名称，处理报告中文乱码，skipped用例不做处理
+            old = cells.pop(1).pop()
+            text = properties.get("origin") + "::" + old.split("::")[1]
+            if "Skipped" not in cells[0]:
+                text = text.encode("raw_unicode_escape").decode("utf-8")
+
+            cells.insert(1, html.td(html.span(text, style_="color: saddlebrown")))
 
             # 用例说明
             desc_td = html.td()
