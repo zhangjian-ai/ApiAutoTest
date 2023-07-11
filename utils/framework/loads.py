@@ -1,0 +1,211 @@
+"""
+@Project: api-auto-test
+@File: dependents.py
+@Author: Seeker
+@Date: 2023/7/8 3:52 下午
+"""
+import os
+import re
+from inspect import isfunction, isclass
+
+import yaml
+import importlib
+
+from types import ModuleType
+from _pytest.config import Config
+from importlib.machinery import SourceFileLoader
+from google.protobuf.internal.python_message import GeneratedProtocolMessageType
+
+from config.settings import BASE_DIR, API_IMP
+
+
+def load_yaml(path) -> dict:
+    """
+    加载yaml文件
+    :param path:
+    :return:
+    """
+    if not path.endswith(".yaml") and not path.endswith(".yml"):
+        raise TypeError("file type is not 'yaml'.")
+
+    with open(path, "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+
+    return data
+
+
+def load_case(target_dir, target: str) -> dict:
+    """
+    根据目标列表加载数据目录中的文件数据
+    如果目标为空，则加载全部
+    """
+    # 临时字段对象
+    all_data = dict()
+    all_case = dict()
+    all_case_name = list()
+
+    # 先按文件将所有数据加载到临时对象
+    for cur_dir, dirs, files in os.walk(target_dir):
+        for file in files:
+            # 不满足测试文件命名规则的文件直接忽略
+            if not file.startswith("test_") or not file.endswith(".yaml"):
+                continue
+
+            # 重复文件校验
+            if file in all_data:
+                raise RuntimeError(f"重复的测试文件名称: {file}")
+
+            file_path = os.path.join(cur_dir, file)
+            details = load_yaml(file_path)
+
+            for key, val in details.items():
+                # 重复用例名称校验
+                if key in all_case_name:
+                    raise RuntimeError(f"重复的测试用例名称: {key}")
+                all_case_name.append(key)
+
+                # 在用例信息中添加文件名称
+                val.get("meta", {})["origin"] = file_path.replace(BASE_DIR, "")[1:]
+
+            all_data[file] = details
+
+    del all_case_name
+
+    # 整理所有用例
+    [all_case.update(item) for item in all_data.values()]
+
+    # target 为空时，返回所有用例
+    if not target:
+        del all_data
+        return all_case
+
+    # target 不为空时，则从临时数据中挑出需要的数据
+    needs = dict()
+    for name in target.split(","):
+        # 文件
+        if name in all_data:
+            needs.update(all_data[name])
+        elif name in all_case:
+            needs.update({name: all_case[name]})
+        else:
+            raise RuntimeError(f"不存在的测试文件或用例名称: {name}")
+
+    del all_data
+    del all_case
+
+    return needs
+
+
+def load_interface_from_dir(path: str) -> dict:
+    """
+    加载路径下所有接口文件中的接口信息
+    """
+
+    # 要求路径必须是目录
+    if not os.path.isdir(path):
+        raise RuntimeError(f"接口文件路径应是一个目录: {path}")
+
+    apis = dict()
+
+    for cur_dir, _, files in os.walk(path):
+        for file in files:
+            apis.update(load_yaml(os.path.join(cur_dir, file)))
+
+    return apis
+
+
+def load_module_attrs(modules: str or list) -> dict:
+    """
+    返回路径下所有类、函数
+    """
+    if not modules:
+        return {}
+
+    # 先倒入模块
+    all_module = []
+
+    if isinstance(modules, str):
+        modules = [modules]
+
+    # 找出所有模块
+    for m in modules:
+        m_path = os.path.join(BASE_DIR, m)
+
+        # 过滤掉无效文件
+        if m.startswith("_") and m.endswith(".py"):
+            continue
+
+        # 如果是有效py文件则直接创建模块对象
+        if not m.startswith("_") and m.endswith(".py"):
+            basename = os.path.basename(m_path)
+            # 手动构建module对象
+            module = SourceFileLoader(basename, path=m_path).load_module(basename)
+            all_module.append(module)
+            continue
+
+        # 如果不是py则说明是目录，则查找出所有py
+        for cur_dir, _, files in os.walk(m_path):
+            for file in files:
+                if not file.startswith("_") and file.endswith(".py"):
+                    module = SourceFileLoader(file, path=os.path.join(cur_dir, file)).load_module(file)
+                    all_module.append(module)
+
+    # 将所有模块中的 类、函数 导出
+    attrs = dict()
+    for module in all_module:
+        for attr in dir(module):
+            if not attr.startswith("_"):
+                unknown = getattr(module, attr)
+                # grpc消息类型也要导入
+                if isclass(unknown) or isfunction(unknown) or isinstance(unknown, GeneratedProtocolMessageType):
+                    attrs[attr] = getattr(module, attr)
+
+    return attrs
+
+
+def load_cls(path: str):
+    """
+    根据导包路径，返回 类
+    """
+    module_path, cls_name = path.rsplit(".", 1)
+
+    module = importlib.import_module(module_path)
+
+    if not isinstance(module, ModuleType):
+        raise RuntimeError(f"导包路径错误: {path}")
+
+    if not hasattr(module, cls_name):
+        raise RuntimeError(f"模块 {module} 中没有要找的类属性: {cls_name}")
+
+    return getattr(module, cls_name)
+
+
+def load_fixture(path: str):
+    """
+    加载用户自定义fixture到conftest.py文件
+    """
+    if path.endswith(".py"):
+        raise RuntimeError(f"自定义夹具文件路径非法: {path}")
+
+    source_module = importlib.import_module(path)
+
+    target_module = importlib.import_module("tests.conftest")
+
+    for unknown in dir(source_module):
+        if isfunction(getattr(source_module, unknown)):
+            setattr(target_module, unknown, getattr(source_module, unknown))
+
+
+def load_args_to_string(string: str, config: Config):
+    """
+    按照框架规则替换命令行参数
+    """
+    args = re.findall(r"\{(.+?)\}", string)
+    for arg in args:
+        string = string.replace("{" + arg + "}", config.getoption(arg))
+
+    return string
+
+
+# rpc 服务类、函数、消息类型
+data_rpc = load_module_attrs(API_IMP)

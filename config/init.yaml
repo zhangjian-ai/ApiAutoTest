@@ -1,0 +1,11 @@
+# 配置 env 变量环境信息后，将会用指定环境的配置项覆盖默认值
+# 主要价值就是 方便调试
+env:
+
+# pytest 命令行参数，该 default 必须存在
+default:
+  host: "http://httpbin.org"
+  port: "80"
+  username: "123"
+  password: "abc"
+  branch:

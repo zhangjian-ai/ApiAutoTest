@@ -13,9 +13,17 @@ from _pytest.python import Metafunc
 from _pytest.runner import CallInfo
 from py._path.local import LocalPath
 
-from utils.common.report import *
-from utils.core import InterfaceManager, Executor
-from utils.common import REPORT, Mail, CONF_DIR, Magic, BASE_DIR, load_data, build_func, load_yaml
+from utils.framework.report import *
+from utils.framework.mail import Mail
+from utils.framework.core import Entry, InterfaceManager
+from utils.framework.magic import Magic
+from utils.framework.loads import load_case, load_yaml, load_fixture, load_args_to_string
+from utils.framework.runner import build_func, Executor, run_setup, run_teardown
+from config.settings import TEMP_DIR, BASE_DIR, TEST_CASE, SETUP_CLASS, TEARDOWN_CLASS, EMAIL_CONF, INIT_FILE, FIXTURES, \
+    REPORT_ENV
+
+# 加载自定义夹具
+load_fixture(FIXTURES)
 
 
 def pytest_addoption(parser: Parser):
@@ -23,21 +31,30 @@ def pytest_addoption(parser: Parser):
     命令行注册
     初始化时最先调用的Hook
     """
+    # 加载舒适化文件
+    conf = load_yaml(INIT_FILE)
+
+    default = conf["default"]
+
+    if conf.get("env"):
+        env_conf = conf.get(conf["env"])
+
+        if env_conf:
+            default.update(env_conf)
+
     # 内置固定命令行
-    parser.addoption("--case", action="store", default=None)
+    if "case" not in default:
+        parser.addoption("--case", action="store", default="")
 
-    # 根据默认配置注册命令行
-    # 根据环境信息覆盖默认配置
-    full = load_yaml(os.path.join(CONF_DIR, "default.yaml"))
+    if "branch" not in default:
+        parser.addoption("--branch", action="store", default="master")
 
-    default = full["default"]
-    env_conf = full.get(full["env"])
-
-    if env_conf:
-        default.update(env_conf)
-
-    # 注册命令行
+    # 注册命初始化令行
     for key, value in default.items():
+        parser.addoption(f"--{key}", action="store", default=value)
+
+    # 注册邮箱配置参数
+    for key, value in EMAIL_CONF.items():
         parser.addoption(f"--{key}", action="store", default=value)
 
 
@@ -49,8 +66,17 @@ def pytest_configure(config: Config):
     # 测试进程开始
     log.info("测试进程启动")
 
-    # 接口管理对象
-    config.im = InterfaceManager(config)
+    # 测试开始时间
+    config.start_time = time.strftime('%Y-%m-%d %H:%M:%S')
+
+    # 接口管理
+    config.im = InterfaceManager()
+
+    # 为Entry类配置config
+    Entry.config = config
+
+    # 执行前置
+    run_setup(SETUP_CLASS, config)
 
 
 def pytest_sessionstart(session: Session):
@@ -58,15 +84,16 @@ def pytest_sessionstart(session: Session):
     创建Session对象后调用的Hook
     config对象配置为session的属性
     """
+    # 删除测试临时目录
+    if not os.path.exists(TEMP_DIR):
+        os.makedirs(TEMP_DIR)
 
     # 测试报告增加元数据
     metadata = session.config._metadata
     metadata.clear()
-    metadata["项目名称"] = "接口自动化测试"
-    metadata["测试时间"] = time.strftime('%Y-%m-%d %H:%M:%S')
 
-    # 会话级别的前置可在此处执行
-    # come baby
+    for key, val in REPORT_ENV.items():
+        metadata[key] = load_args_to_string(val, session.config)
 
 
 def pytest_pycollect_makemodule(path: LocalPath, parent: Collector):
@@ -77,19 +104,19 @@ def pytest_pycollect_makemodule(path: LocalPath, parent: Collector):
     if path.purebasename == "test_entrypoint":
 
         # 获取用例名称及其文件路径的映射关系
-        data_source = load_data(target_dir=os.path.join(BASE_DIR, "data"),
-                                target_case=parent.config.getoption("case"))
+        cases = load_case(target_dir=os.path.join(BASE_DIR, TEST_CASE),
+                          target=parent.config.getoption("case"))
 
         # 导入入口模块，加载用例
         from importlib import import_module
         module = import_module("tests.test_entrypoint")
 
         # 构建用例
-        for key in data_source.keys():
-            setattr(module, key, build_func(key))
+        for key, val in cases.items():
+            setattr(module, key, build_func(key, extend_fixtures=val.get("spec", {}).get("fixtures", [])))
 
         # 传递测试数据
-        parent.config.data_source = data_source
+        parent.config.cases = cases
 
 
 def pytest_generate_tests(metafunc: Metafunc):
@@ -100,7 +127,7 @@ def pytest_generate_tests(metafunc: Metafunc):
 
     # 获取用例数据
     case_name = metafunc.function.__name__
-    data = metafunc.config.data_source.get(case_name)
+    data = metafunc.config.cases.get(case_name)
 
     if not data:
         raise RuntimeError(f"用例数据不存在，用例名称: {case_name}")
@@ -160,7 +187,7 @@ def pytest_collection_modifyitems(session: Session, config: Config, items: List[
         item._nodeid = item._nodeid.encode("utf-8").decode("unicode-escape")
 
         # 为item添加mark
-        for mark in config.data_source.get(item.originalname).get("spec", {}).get("marks", ""):
+        for mark in config.cases.get(item.originalname).get("spec", {}).get("marks", ""):
             item.add_marker(mark)
 
 
@@ -183,14 +210,17 @@ def pytest_runtest_makereport(item: Item, call: CallInfo[None]):
 def pytest_sessionfinish(session: Session, exitstatus: int):
     if xdist.is_xdist_master(session):
         # 测试报告也仅在主节点发送一次
-        if os.path.exists(REPORT):
-            with open(REPORT, "r") as f:
-                Mail.config = session.config
-                subject = "测试报告"
-                Mail.send_mail(content=f.read(), subject=subject, annex_files=[REPORT])
+        if hasattr(session.config, "_html"):
+            with open(session.config._html.logfile, "r") as f:
+                Mail.send_mail(config=session.config, content=f.read(), annex_files=[session.config._html.logfile])
 
         # 分布式测试时，在主节点执行数据清理逻辑
-        log.info("清理测试数据")
+        log.info("执行测试后处理")
+        run_teardown(TEARDOWN_CLASS)
+
+        # 删除测试临时目录
+        if os.path.exists(TEMP_DIR):
+            os.system(f"rm -rf {TEMP_DIR}")
 
     log.info(f"测试进程结束，Exit Code:{exitstatus}")
 

@@ -7,3 +7,4 @@ venv
 *.pyc
 
 report/*.html
+temporary

@@ -3,7 +3,7 @@ import pytest
 
 from py.xml import html
 
-from utils.common import log
+from utils.framework.open.logger import log
 
 """
 设置html报告样式
@@ -14,7 +14,7 @@ from utils.common import log
 
 @pytest.mark.optionalhook
 def pytest_html_report_title(report):
-    report.title = "测试报告"
+    report.title = "自动化接口测试报告"
 
 
 @pytest.mark.optionalhook

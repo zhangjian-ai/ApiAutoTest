@@ -66,6 +66,7 @@ test_demo_03:
   spec:
     marks: [ "smoke" ]
     skips: [ ]
+    fixtures: [ "params" ]
   meta:
     desc: "又一个演示用例"
     author: "goodman"
@@ -110,7 +111,7 @@ test_demo_03:
           val: {  # 这里使用逻辑比较检验结果，如果是列表检验长度，如果是字符串数字等直接比较大小
             ">": 2,  # 检验返回值是否大于2
             "==": 4,  # 检验是否等于4
-            "not in": 100  # 检验返回值是否包含 100 这一项，这里校验会失败。错误日志可见测试报告 report/report.html
+            "in": 100  # 检验返回值是否包含 100 这一项，这里校验会失败。错误日志可见测试报告 report/report.html
           }
         },
         status_code: 200

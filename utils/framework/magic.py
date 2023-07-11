@@ -1,16 +1,17 @@
 import re
-
 import pytest
 
-from utils import factory
+from config.settings import DATA_FACTORY
+from utils.framework.loads import load_module_attrs
+
+# 工厂数据
+data_factory = load_module_attrs(DATA_FACTORY)
 
 
 class Magic:
     """
     处理原始测试数据中的模版语法
     """
-    # 工厂方法对象
-    objs = vars(factory)
 
     def __init__(self):
         # r对象，应该是一个列表
@@ -60,7 +61,7 @@ class Magic:
 
         for arg in args:
             # 转换模版代码为真是数据值
-            target = eval(arg, dict(**self.objs, **params))
+            target = eval(arg, dict(**data_factory, **params))
 
             if f"@<{arg}>" == origin:
                 return target
@@ -81,9 +82,9 @@ class Magic:
 
                 if args and f"@<{args[0]}>" == val:
                     try:
-                        target = eval(args[0], Magic.objs)
+                        target = eval(args[0], data_factory)
                     except:
                         pass
                     else:
-                        if isinstance(target, (list, tuple)):
+                        if isinstance(target, list):
                             data[key] = target

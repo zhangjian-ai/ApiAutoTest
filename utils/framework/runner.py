@@ -1,79 +1,75 @@
-import os
+"""
+@Project: api-auto-test
+@File: runner.py
+@Author: Seeker
+@Date: 2023/7/8 5:58 下午
+"""
+
 import json
+import time
+import pytest
 
-import requests
-import traceback
+from copy import deepcopy
+from types import FunctionType
 
-from urllib import parse
+from _pytest.config import Config
 
-from utils.common import log, TEMP_DIR
+from utils.framework.magic import Magic
+from utils.framework.core import Setup, Teardown
+from utils.framework.loads import load_cls, data_rpc
+from utils.framework.open.helper import http_request, protobuf_to_dict
+from utils.framework.open.logger import log
 
 
-def http_request(method="POST", url=None, data=None, params=None, headers=None, cookies=None, detail=True):
+def build_func(name: str, extend_fixtures: list):
     """
-    二次封装 http request 方法
+    创建一个函数
     """
+    # 夹具
+    fixtures = ["executor"]
 
-    # 为POST请求处理Content-Type
-    if method.upper() == "POST":
-        if headers is None:
-            headers = {}
+    if extend_fixtures:
+        fixtures.extend(extend_fixtures)
 
-        if "Content-Type" not in headers:
-            headers["Content-Type"] = "application/json"
+    # 将code串编译成code对象
+    code = \
+    compile(source=f'def func({",".join(fixtures)}):\n\texecutor.schedule()', filename=name, mode="exec").co_consts[0]
+    # 创建函数
+    # globals 选项为函数提供全局变量。比如函数内部需要调用其他方法，如果不指定会ERROR
+    # locals()/globals() 内置函数分别返回局部(所在局部块，这里就是函数内部作用域)/全局(当前模块)的作用域字典
+    function = FunctionType(code=code, globals=globals(), name=name)
 
-    # 日志打印
-    if detail:
-        log.info(f'请求地址: {url}')
-        log.info(f'请求方式: {method}')
-        log.info(f'请求头: {headers}')
-        log.info(f'查询参数: {params}')
-        log.info(f'表单参数: {data}')
+    return function
 
-    # 处理data数据
-    if data and method.upper() == "POST" and 'json' in headers.get("Content-Type"):
-        data = json.dumps(data)
 
-    try:
-        response = requests.request(method, url, data=data, params=params, headers=headers, cookies=cookies)
-        res = None
-        try:
-            res = response.json()
-        except:
-            pass
+def run_setup(cls_path: str, config: Config):
+    """
+    根据用户配置的 Setup 类 执行前置操作
+    """
+    if cls_path:
+        cls = load_cls(cls_path)
 
-        if detail:
-            log.info(f'状态码: {response.status_code}')
+        if not issubclass(cls, Setup):
+            raise RuntimeError(f"自定义前置类不是 Setup 子类: {cls}")
 
-        if res:
-            res["status_code"] = response.status_code
-        else:
-            # response.json() 解析异常时，单独构建响应结果
-            res = {"status_code": response.status_code}
+        config.setup = cls()
 
-        # 检查是否是文件下载接口
-        if "Content-Disposition" in response.headers:
-            # 持久化文件到本地，文件名加上一个随机串避免多用例冲突
-            disposition = parse.unquote(response.headers["Content-Disposition"])
-            name = disposition.rsplit('=', 1)[1].split(';', 1)[0]
-            file = os.path.join(TEMP_DIR, name)
+        # 执行准备工作
+        config.setup.before()
 
-            with open(file, "wb") as f:
-                f.write(response.content)
 
-            # 为结果增加 content、file 字段
-            # content 记录二进制长度
-            res["size"] = len(response.content)
-            res["file"] = file
+def run_teardown(cls_path: str):
+    """
+    根据用户配置的 Teardown 类 执行后置操作
+    """
+    if cls_path:
+        cls = load_cls(cls_path)
 
-        if detail:
-            log.info(f'响应结果: {res}')
+        if not issubclass(cls, Teardown):
+            raise RuntimeError(f"自定义后置类不是 Teardown 子类: {cls}")
 
-        return res
-
-    except Exception as e:
-        log.error(f'http 请求异常: {traceback.format_exc()}')
-        raise e
+        # 执行后置工作
+        cls().after()
 
 
 def verify(expect: dict, response: dict):
@@ -88,6 +84,11 @@ def verify(expect: dict, response: dict):
             real_value = response
             if not isinstance(response, (int, float, str)):
                 real_value = len(response)
+
+            if isinstance(real_value, str):
+                real_value = f"'{real_value}'"
+            if isinstance(value, str):
+                value = f"'{value}'"
 
             assert eval(f"{real_value} {key} {value}"), f'\n' \
                                                         f'KEY: {key} \n' \
@@ -113,9 +114,14 @@ def verify(expect: dict, response: dict):
                 _verify_list(key, value, response, operate=key)
 
             else:
+                if isinstance(value, str):
+                    value = f"'{value}'"
+                if isinstance(response, str):
+                    response = f"'{response}'"
+
                 assert eval(f"{value} {key} {response}"), f'\n' \
                                                           f'KEY: {key} \n' \
-                                                          f'运算符: {key} \n' \
+                                                          f'运算符: {key} ' \
                                                           f'预期值: {value}\n' \
                                                           f'实际值: {response}\n' \
                                                           f'包含关系运算结果不为真'
@@ -195,6 +201,11 @@ def _verify_list(key: str, expect: list, response: list, operate: str = "in"):
 
         # 常规类型时，考虑返回值可能无序，直接用 operate 执行运算
         elif isinstance(sub_val, (str, int, float)):
+            if isinstance(sub_val, str):
+                sub_val = f"'{sub_val}'"
+            if isinstance(response, str):
+                response = f"'{response}'"
+
             assert eval(f"{sub_val} {operate} {response}"), f'\n' \
                                                             f'KEY: {key}\n' \
                                                             f'预期列表: {expect}\n' \
@@ -220,3 +231,157 @@ def _verify_list(key: str, expect: list, response: list, operate: str = "in"):
                            f'预期值: {sub_val}\n' \
                            f'实际值: {response}\n' \
                            f'包含关系运算结果不为真'
+
+
+def call(im, step):
+    """
+    执行请求
+    """
+    # 获取接口信息
+    api = step.get("api")
+
+    # 为请求数据 处理关联 和 动态数据替换
+    request = deepcopy(step.get("request"))
+    expect = deepcopy(step.get("response", {}))
+
+    # 请求类型。不是http全部当作gRPC
+    is_http = "(**request)" not in api
+
+    # http
+    if is_http:
+        api = getattr(im, api)
+
+        # 测试数据替换默认的api数据
+        for key, val in request.items():
+            if key in api:
+                if key == "url":
+                    api["url"] += str(val)
+
+                elif isinstance(api[key], dict):
+                    api[key].update(val)
+
+                continue
+
+            api[key] = val
+    else:
+        service = api.split(".", 1)[0]
+        stub = service + "Stub"
+        api = api.replace(service, stub)
+
+    # 根据调度逻辑处理接口调用和验证
+    rule = {"timeout": 0, "interval": 3}
+    rule.update(step.get("rule", {}))
+    response = None
+    start = 0
+
+    while start <= rule["timeout"]:
+        try:
+            # 请求接口
+            response = http_request(**api) if is_http else protobuf_to_dict(exec(api, data_rpc))
+
+            verify(expect, response)
+
+            break
+        except Exception as e:
+            # 如果是最后一次接口调用就引发异常
+            if start > rule["timeout"] - rule["interval"]:
+                raise e
+
+            start += rule["interval"]
+            time.sleep(rule["interval"])
+
+    return response or {}
+
+
+class Executor:
+    """
+    用例执行器
+    """
+
+    def __init__(self, request, record_property):
+        self.data = request.param
+        self.config = request.config
+        self.func = request.function.__name__
+        self.record_property = record_property
+
+        # 神奇魔法
+        self.magic = Magic()
+
+        # 用例 参数化变量，转换之后赋值给magic
+        args = deepcopy(self.data.get("param", {}))
+        self.magic.trans(args)
+        self.magic.cp = args
+
+        # 校验用例是否可执行
+        self.inspect()
+
+    def inspect(self):
+        """
+        用例开始前的审查工作
+        """
+        # 判断skip
+        spec = deepcopy(self.data.get("spec", {}))
+        skips = spec.get("skips", [])
+        branch = self.config.getoption("branch")
+
+        if branch and branch in skips:
+            log.warning(f"分支<{self.config.getoption('branch')}> 已限制用例 <{self.func}> 不执行")
+            pytest.skip(f"分支<{self.config.getoption('branch')}> 已限制用例 <{self.func}> 不执行")
+
+        # 绑定用例信息
+        meta = deepcopy(self.data.get("meta", {}))
+        self.magic.trans(meta)
+        meta["params"] = self.magic.cp
+
+        [self.record_property(key, val) for key, val in meta.items()]
+
+        # 用例开始执行
+        log.info(f"执行用例: {self.func} <{meta.get('desc')}>")
+
+    def schedule(self):
+        """
+        用例具体的step在这里调度完成
+        """
+        # 处理 step 级别的参数化
+        origin_steps = deepcopy(self.data["steps"])
+        target_steps = []
+
+        for step in origin_steps:
+            param = step.get("param", None)
+
+            if param:
+                Magic.trans_parameters(param)
+
+                keys = [key for key in param.keys()]
+
+                # 将所有非列表值修正为列表
+                for key in keys:
+                    if not isinstance(param[key], (list, tuple)):
+                        param[key] = [param[key]]
+
+                for i in range(len(param[keys[0]])):
+                    args = {}
+                    for key in keys:
+                        args[key] = param[key][i]
+                    item = deepcopy(step)
+                    item["step_args"] = args
+                    target_steps.append(item)
+            else:
+                target_steps.append(step)
+
+        # 按步骤依次调度
+        for idx, step in enumerate(target_steps):
+            # 处理步骤模版参数，转换之后赋值给magic
+            args = step.pop("step_args", {})
+            self.magic.sp.clear()
+            self.magic.trans(args)
+            self.magic.sp = args
+
+            # 处理其他模版参数
+            self.magic.trans(step)
+
+            # 打印用户自定义日志
+            log.info(f"Step {idx + 1}: {step.get('desc', '未填写step描述信息，建议补充')}")
+
+            # 暂存当前接口调用结果到stages
+            self.magic.r.append(call(self.config.im, step))

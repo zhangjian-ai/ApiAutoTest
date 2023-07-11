@@ -1,12 +1,12 @@
 import os
 import smtplib
 
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from email.utils import formataddr
-from email.mime.base import MIMEBase
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
-from utils.common import log
+from utils.framework.loads import load_args_to_string
+from utils.framework.open.logger import log
 
 
 class Mail:
@@ -15,19 +15,20 @@ class Mail:
     需要使用 pytest config 对象
     """
 
-    config = None
-
     @classmethod
-    def send_mail(cls, content, subject, annex_files: list = None):
+    def send_mail(cls, config, content, annex_files: list = None):
         # 参数处理，部分默认值需要填写
-        smtp_server = cls.config.getoption("smtp_server")
-        ssl_port = cls.config.getoption("ssl_port")
-        sender_name = cls.config.getoption("from_name")
-        from_addr = cls.config.getoption("email_sender")
-        password = cls.config.getoption("email_password")
+        smtp_server = config.getoption("smtp_server")
+        ssl_port = config.getoption("ssl_port")
+        sender_name = config.getoption("from_name")
+        from_addr = config.getoption("email_sender")
+        password = config.getoption("email_password")
 
-        subject = cls.config.getoption("subject") or subject
-        recipients = cls.config.getoption("email_receiver")
+        # 处理subject中的变量
+        subject: str = load_args_to_string(config.getoption("subject"), config)
+
+        subject = f"{subject}({config.start_time})"
+        recipients = config.getoption("email_receiver")
 
         if not all([smtp_server, ssl_port, sender_name, from_addr, password, recipients, subject]):
             log.warning("邮件参数配置缺失，测试报告已保存到 report 目录。")
