@@ -15,8 +15,8 @@ from types import FunctionType
 from _pytest.config import Config
 
 from utils.framework.magic import Magic
-from utils.framework.core import Setup, Teardown
 from utils.framework.loads import load_cls, data_rpc
+from utils.framework.open.entry import Setup, Teardown
 from utils.framework.open.helper import http_request, protobuf_to_dict
 from utils.framework.open.logger import log
 
@@ -31,9 +31,10 @@ def build_func(name: str, extend_fixtures: list):
     if extend_fixtures:
         fixtures.extend(extend_fixtures)
 
+    source = f'def func({",".join(fixtures)}):\n\texecutor.magic.fp=locals()\n\texecutor.schedule()'
+
     # 将code串编译成code对象
-    code = \
-    compile(source=f'def func({",".join(fixtures)}):\n\texecutor.schedule()', filename=name, mode="exec").co_consts[0]
+    code = compile(source=source, filename=name, mode="exec").co_consts[0]
     # 创建函数
     # globals 选项为函数提供全局变量。比如函数内部需要调用其他方法，如果不指定会ERROR
     # locals()/globals() 内置函数分别返回局部(所在局部块，这里就是函数内部作用域)/全局(当前模块)的作用域字典
@@ -183,13 +184,6 @@ def _verify_list(key: str, expect: list, response: list, operate: str = "in"):
                                                 f'预期值: {expect}\n' \
                                                 f'实际值: {response}\n'
 
-    # # 列表长度校验
-    # if len(value) != len(real_value):
-    #     assert False, f'\n' \
-    #                   f'KEY: {key} \n' \
-    #                   f'预期列表长度: {len(value)}\n' \
-    #                   f'实际列表长度: {len(real_value)}\n'
-
     # 列表项依次校验
     for sub_val in expect:
         # 此处不考虑列表项仍然是列表的情况，此种情况也不能出现在脚本中
@@ -231,6 +225,17 @@ def _verify_list(key: str, expect: list, response: list, operate: str = "in"):
                            f'预期值: {sub_val}\n' \
                            f'实际值: {response}\n' \
                            f'包含关系运算结果不为真'
+
+
+def verify_result(expect: dict, response: dict):
+    """
+    处理断言错误信息，过滤掉无用的traceback信息
+    """
+    try:
+        verify(expect, response)
+    except AssertionError as e:
+        e.__traceback__ = None
+        raise e
 
 
 def call(im, step):
@@ -279,7 +284,7 @@ def call(im, step):
             # 请求接口
             response = http_request(**api) if is_http else protobuf_to_dict(exec(api, data_rpc))
 
-            verify(expect, response)
+            verify_result(expect, response)
 
             break
         except Exception as e:
@@ -332,6 +337,7 @@ class Executor:
         meta = deepcopy(self.data.get("meta", {}))
         self.magic.trans(meta)
         meta["params"] = self.magic.cp
+        meta["start_time"] = time.strftime('%Y-%m-%d %H:%M:%S')
 
         [self.record_property(key, val) for key, val in meta.items()]
 

@@ -196,7 +196,7 @@ def load_fixture(path: str):
             setattr(target_module, unknown, getattr(source_module, unknown))
 
 
-def load_args_to_string(string: str, config: Config):
+def render_string(string: str, config: Config):
     """
     按照框架规则替换命令行参数
     """

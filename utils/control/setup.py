@@ -4,7 +4,7 @@
 @Author: Seeker
 @Date: 2023/7/9 12:34 下午
 """
-from utils.framework.core import Setup
+from utils.framework.open.entry import Setup
 
 
 class MySetup(Setup):

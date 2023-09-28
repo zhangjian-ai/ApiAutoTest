@@ -23,6 +23,9 @@ class Magic:
         # 步骤参数化对象
         self.sp = {}
 
+        # 夹具对象
+        self.fp = {}
+
     def trans(self, data):
         """
         将对象data中模版语法转换成真是数据
@@ -58,6 +61,7 @@ class Magic:
         params = {"r": self.r}
         params.update(self.cp)
         params.update(self.sp)
+        params.update(self.fp)
 
         for arg in args:
             # 转换模版代码为真是数据值

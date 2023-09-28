@@ -34,7 +34,7 @@ def pytest_html_results_table_header(cells):
     cells.pop(-1)
 
     # 表头
-    cells.insert(3, html.th('Time', class_='sortable time', col='time'))
+    cells.insert(3, html.th('StartTime', class_='sortable time', col='time'))
     cells.insert(4, html.th('用例描述'))
     cells.insert(5, html.th("作者"))
     cells.insert(6, html.th("用例等级"))
@@ -54,7 +54,7 @@ def pytest_html_results_table_row(report, cells):
 
             # 自定义列
             properties = dict(report.user_properties)
-            cells.insert(3, html.td(html.p(time.strftime('%m-%d %H:%M:%S'), class_='col-time')))
+            cells.insert(3, html.td(properties.get("start_time"), class_='col-time'))
 
             # Test列处理
             # 用例名称，处理报告中文乱码，skipped用例不做处理

@@ -5,7 +5,6 @@ from email.utils import formataddr
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from utils.framework.loads import load_args_to_string
 from utils.framework.open.logger import log
 
 
@@ -18,17 +17,14 @@ class Mail:
     @classmethod
     def send_mail(cls, config, content, annex_files: list = None):
         # 参数处理，部分默认值需要填写
-        smtp_server = config.getoption("smtp_server")
-        ssl_port = config.getoption("ssl_port")
-        sender_name = config.getoption("from_name")
-        from_addr = config.getoption("email_sender")
-        password = config.getoption("email_password")
+        smtp_server = config.get("smtp_server")
+        ssl_port = config.get("ssl_port")
+        sender_name = config.get("from_name")
+        from_addr = config.get("email_sender")
+        password = config.get("email_password")
 
-        # 处理subject中的变量
-        subject: str = load_args_to_string(config.getoption("subject"), config)
-
-        subject = f"{subject}({config.start_time})"
-        recipients = config.getoption("email_receiver")
+        subject = f"{config.get('subject')} [{config.get('start_time')}]"
+        recipients = config.get("email_receiver")
 
         if not all([smtp_server, ssl_port, sender_name, from_addr, password, recipients, subject]):
             log.warning("邮件参数配置缺失，测试报告已保存到 report 目录。")

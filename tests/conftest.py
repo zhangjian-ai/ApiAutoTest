@@ -15,15 +15,12 @@ from py._path.local import LocalPath
 
 from utils.framework.report import *
 from utils.framework.mail import Mail
-from utils.framework.core import Entry, InterfaceManager
 from utils.framework.magic import Magic
-from utils.framework.loads import load_case, load_yaml, load_fixture, load_args_to_string
+from utils.framework.core import Entry, InterfaceManager
+from utils.framework.loads import load_case, load_yaml, load_fixture, render_string
 from utils.framework.runner import build_func, Executor, run_setup, run_teardown
 from config.settings import TEMP_DIR, BASE_DIR, TEST_CASE, SETUP_CLASS, TEARDOWN_CLASS, EMAIL_CONF, INIT_FILE, FIXTURES, \
     REPORT_ENV
-
-# 加载自定义夹具
-load_fixture(FIXTURES)
 
 
 def pytest_addoption(parser: Parser):
@@ -78,6 +75,9 @@ def pytest_configure(config: Config):
     # 执行前置
     run_setup(SETUP_CLASS, config)
 
+    # 加载自定义夹具
+    load_fixture(FIXTURES)
+
 
 def pytest_sessionstart(session: Session):
     """
@@ -93,7 +93,7 @@ def pytest_sessionstart(session: Session):
     metadata.clear()
 
     for key, val in REPORT_ENV.items():
-        metadata[key] = load_args_to_string(val, session.config)
+        metadata[key] = render_string(val, session.config)
 
 
 def pytest_pycollect_makemodule(path: LocalPath, parent: Collector):
