@@ -10,15 +10,17 @@ import time
 import pytest
 
 from copy import deepcopy
+from typing import Optional
 from types import FunctionType
 
 from _pytest.config import Config
+from _pytest.fixtures import SubRequest
 
-from utils.framework.magic import Magic
-from utils.framework.loads import load_cls, data_rpc
-from utils.framework.open.entry import Setup, Teardown
-from utils.framework.open.helper import http_request, protobuf_to_dict
 from utils.framework.open.logger import log
+from utils.framework.inner.render import Render
+from utils.framework.inner.loads import load_cls
+from utils.framework.open.entry import Setup, Teardown, Entry
+from utils.framework.open.helper import http_request, protobuf_to_dict
 
 
 def build_func(name: str, extend_fixtures: list):
@@ -238,7 +240,7 @@ def verify_result(expect: dict, response: dict):
         raise e
 
 
-def call(im, step):
+def call(im, step, order):
     """
     执行请求
     """
@@ -249,12 +251,15 @@ def call(im, step):
     request = deepcopy(step.get("request"))
     expect = deepcopy(step.get("response", {}))
 
-    # 请求类型。不是http全部当作gRPC
-    is_http = "(**request)" not in api
+    # 日志
+    log_info = step.get('log', '无当前步骤说明信息，建议补充')
 
-    # http
+    # 请求类型
+    is_http = True
+
+    # http 数据拼接
     if is_http:
-        api = getattr(im, api)
+        api = im.get(api)
 
         # 测试数据替换默认的api数据
         for key, val in request.items():
@@ -269,20 +274,25 @@ def call(im, step):
 
             api[key] = val
     else:
-        service = api.split(".", 1)[0]
-        stub = service + "Stub"
-        api = api.replace(service, stub)
+        pass
 
     # 根据调度逻辑处理接口调用和验证
     rule = {"timeout": 0, "interval": 3}
     rule.update(step.get("rule", {}))
+    rule["interval"] = max(rule["interval"], 1)
     response = None
     start = 0
 
     while start <= rule["timeout"]:
         try:
+
+            # 打印用户日志
+            retry = start // rule["interval"]
+            suffix = f" [retry_times: {retry}] " if retry > 0 else ""
+            log.info(f" Step {order}: {log_info}{suffix}")
+
             # 请求接口
-            response = http_request(**api) if is_http else protobuf_to_dict(exec(api, data_rpc))
+            response = http_request(**api) if is_http else {}
 
             verify_result(expect, response)
 
@@ -298,51 +308,56 @@ def call(im, step):
     return response or {}
 
 
-class Executor:
+class Executor(Entry):
     """
     用例执行器
     """
 
-    def __init__(self, request, record_property):
+    def __init__(self, request: SubRequest):
+
         self.data = request.param
-        self.config = request.config
-        self.func = request.function.__name__
-        self.record_property = record_property
 
         # 神奇魔法
-        self.magic = Magic()
+        self.magic = Render(deepcopy(self.data.get("param", {})))
 
-        # 用例 参数化变量，转换之后赋值给magic
-        args = deepcopy(self.data.get("param", {}))
-        self.magic.trans(args)
-        self.magic.cp = args
+        # 记录用例描述信息
+        info = deepcopy(self.data.get("info", {}))
 
-        # 校验用例是否可执行
-        self.inspect()
+        info["params"] = self.magic.cp
+        info["start_time"] = time.strftime('%Y-%m-%d %H:%M:%S')
 
-    def inspect(self):
+        [request.node.user_properties.append((key, val)) for key, val in info.items()]
+
+    @staticmethod
+    def _validator(func_name, spec, branch):
         """
-        用例开始前的审查工作
+        检查用例有效性
         """
-        # 判断skip
-        spec = deepcopy(self.data.get("spec", {}))
+
         skips = spec.get("skips", [])
-        branch = self.config.getoption("branch")
 
         if branch and branch in skips:
-            log.warning(f"分支<{self.config.getoption('branch')}> 已限制用例 <{self.func}> 不执行")
-            pytest.skip(f"分支<{self.config.getoption('branch')}> 已限制用例 <{self.func}> 不执行")
+            log.warning(f"分支<{branch}> 已限制用例 <{func_name}> 不执行")
+            pytest.skip(f"分支<{branch}> 已限制用例 <{func_name}> 不执行")
 
-        # 绑定用例信息
-        meta = deepcopy(self.data.get("meta", {}))
-        self.magic.trans(meta)
-        meta["params"] = self.magic.cp
-        meta["start_time"] = time.strftime('%Y-%m-%d %H:%M:%S')
+    @staticmethod
+    def request_of(request: SubRequest) -> Optional:
+        """
+        校验用例的可行性。可行则返回一个Executor实例
+        @param request:
+        @return:
+        """
+        data = request.param
+        config = request.config
+        func_name = request.function.__name__
 
-        [self.record_property(key, val) for key, val in meta.items()]
+        # 检查可行性
+        Executor._validator(func_name, deepcopy(data.get("spec", {})), config.getoption("branch"))
 
         # 用例开始执行
-        log.info(f"执行用例: {self.func} <{meta.get('desc')}>")
+        log.info(f"执行用例: {func_name} <{data.get('info', {}).get('description')}>")
+
+        return Executor(request)
 
     def schedule(self):
         """
@@ -356,7 +371,7 @@ class Executor:
             param = step.get("param", None)
 
             if param:
-                Magic.trans_parameters(param)
+                Render.trans_parameters(param)
 
                 keys = [key for key in param.keys()]
 
@@ -379,15 +394,11 @@ class Executor:
         for idx, step in enumerate(target_steps):
             # 处理步骤模版参数，转换之后赋值给magic
             args = step.pop("step_args", {})
-            self.magic.sp.clear()
             self.magic.trans(args)
             self.magic.sp = args
 
             # 处理其他模版参数
             self.magic.trans(step)
 
-            # 打印用户自定义日志
-            log.info(f"Step {idx + 1}: {step.get('desc', '未填写step描述信息，建议补充')}")
-
             # 暂存当前接口调用结果到stages
-            self.magic.r.append(call(self.config.im, step))
+            self.magic.r.append(call(self.im, step, idx + 1))

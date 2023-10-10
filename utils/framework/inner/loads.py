@@ -1,22 +1,14 @@
-"""
-@Project: api-auto-test
-@File: dependents.py
-@Author: Seeker
-@Date: 2023/7/8 3:52 下午
-"""
 import os
-import re
-from inspect import isfunction, isclass
-
 import yaml
 import importlib
 
 from types import ModuleType
-from _pytest.config import Config
+from inspect import isfunction, isclass
 from importlib.machinery import SourceFileLoader
 from google.protobuf.internal.python_message import GeneratedProtocolMessageType
 
-from config.settings import BASE_DIR, API_IMP
+from config.settings import BASE_DIR
+from utils.framework.open.logger import log
 
 
 def load_yaml(path) -> dict:
@@ -27,6 +19,10 @@ def load_yaml(path) -> dict:
     """
     if not path.endswith(".yaml") and not path.endswith(".yml"):
         raise TypeError("file type is not 'yaml'.")
+
+    if not os.path.exists(path):
+        log.error(f"试图加载一个不存在的文件: {path}")
+        return {}
 
     with open(path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
@@ -65,7 +61,7 @@ def load_case(target_dir, target: str) -> dict:
                 all_case_name.append(key)
 
                 # 在用例信息中添加文件名称
-                val.get("meta", {})["origin"] = file_path.replace(BASE_DIR, "")[1:]
+                val.get("info", {})["origin"] = file_path.replace(BASE_DIR, "")[1:]
 
             all_data[file] = details
 
@@ -184,6 +180,9 @@ def load_fixture(path: str):
     """
     加载用户自定义fixture到conftest.py文件
     """
+    if not path:
+        return
+
     if path.endswith(".py"):
         raise RuntimeError(f"自定义夹具文件路径非法: {path}")
 
@@ -193,19 +192,5 @@ def load_fixture(path: str):
 
     for unknown in dir(source_module):
         if isfunction(getattr(source_module, unknown)):
+            log.info(f"注入自定义夹具: {unknown}")
             setattr(target_module, unknown, getattr(source_module, unknown))
-
-
-def render_string(string: str, config: Config):
-    """
-    按照框架规则替换命令行参数
-    """
-    args = re.findall(r"\{(.+?)\}", string)
-    for arg in args:
-        string = string.replace("{" + arg + "}", config.getoption(arg))
-
-    return string
-
-
-# rpc 服务类、函数、消息类型
-data_rpc = load_module_attrs(API_IMP)

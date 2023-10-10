@@ -1,24 +1,18 @@
-"""
-@Project: api-auto-test
-@File: core.py
-@Author: Seeker
-@Date: 2023/7/8 3:04 下午
-"""
 import os
+import threading
+
 from copy import deepcopy
+from collections import defaultdict
 
-from abc import abstractmethod
-
-from utils.framework.open.entry import Entry
-from config.settings import API_IMP, API_FILE, BASE_DIR
-from utils.framework.loads import load_interface_from_dir, load_module_attrs
+from config.settings import API_FILE, BASE_DIR
+from utils.framework.inner.loads import load_interface_from_dir
 
 
 class InterfaceManager:
     """
     接口管理类
     """
-    __slots__ = ["products", "attrs"]
+    __slots__ = ["products"]
 
     class Interface:
         """
@@ -30,7 +24,7 @@ class InterfaceManager:
             self.name = name
             self.apis = apis
 
-        def __getattribute__(self, item):
+        def get(self, item) -> dict:
             if item in ["name", "apis"]:
                 return object.__getattribute__(self, item)
 
@@ -44,8 +38,8 @@ class InterfaceManager:
         self.products = {}
 
         # 校验api配置
-        if (API_FILE and API_IMP) or (not API_FILE and not API_IMP):
-            raise RuntimeError(f"api配置冲突，请检查 settings 配置文件")
+        if not API_FILE:
+            raise RuntimeError(f"API_FILE 配置错误，请检查 settings 文件")
 
         if API_FILE:
             for conf in API_FILE:
@@ -53,11 +47,8 @@ class InterfaceManager:
                     InterfaceManager.Interface(name=conf["product"],
                                                apis=load_interface_from_dir(os.path.join(BASE_DIR, conf["path"])))
 
-        if API_IMP:
-            self.attrs = load_module_attrs(API_IMP)
-
-    def __getattribute__(self, item):
-        if item in ["products", "attrs"]:
+    def get(self, item) -> dict or Interface:
+        if item in ["products"]:
             return object.__getattribute__(self, item)
 
         # 分解item
@@ -70,4 +61,23 @@ class InterfaceManager:
         if product not in self.products:
             raise RuntimeError(f"无效产品名称: {product}，请检查 settings 配置文件")
 
-        return getattr(self.products[product], interface) if interface else self.products[product]
+        return self.products[product].get(interface) if interface else self.products[product]
+
+
+class Singleton(type):
+    """
+    单例元类
+    """
+    __lock = threading.Lock()
+    __instances = defaultdict()
+
+    def __call__(cls, *args, **kwargs):
+        # 根据调用方、调用参数生成一个唯一的key
+        key = cls.__name__ + str(args) + str(kwargs)
+
+        # 加锁，判断当前key是否已有实例
+        with Singleton.__lock:
+            if key not in Singleton.__instances:
+                Singleton.__instances[key] = super(Singleton, cls).__call__(*args, **kwargs)
+
+        return Singleton.__instances[key]

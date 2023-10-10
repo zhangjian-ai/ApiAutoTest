@@ -1,36 +1,40 @@
 import re
 import pytest
 
-from config.settings import DATA_FACTORY
-from utils.framework.loads import load_module_attrs
-
-# 工厂数据
-data_factory = load_module_attrs(DATA_FACTORY)
+from utils.framework.open.entry import Entry
 
 
-class Magic:
+class Render(Entry):
     """
     处理原始测试数据中的模版语法
     """
 
-    def __init__(self):
+    def __init__(self, params: dict):
+        """
+        构造器
+        @param params: 用例接别的参数化数据
+        """
         # r对象，应该是一个列表
         self.r = []
-
-        # 用例参数化对象
-        self.cp = {}
 
         # 步骤参数化对象
         self.sp = {}
 
-        # 夹具对象
+        # 夹具
         self.fp = {}
+
+        # 用例参数化对象
+        self.cp = params
+        self.trans(params)
 
     def trans(self, data):
         """
         将对象data中模版语法转换成真是数据
         """
         if isinstance(data, dict):
+            # 增加处理 sign 签名的逻辑
+            sign = data.pop("sign", None)
+
             for key, val in data.items():
                 if not val or isinstance(val, (int, float)):
                     continue
@@ -38,6 +42,14 @@ class Magic:
                     data[key] = self._magic_(val)
                 else:
                     self.trans(val)
+
+            # 处理签名
+            if sign is not None:
+                if isinstance(sign, str):
+                    self.sp['data'] = data
+                    data["sign"] = self._magic_(sign)
+                else:
+                    data["sign"] = sign
 
         elif isinstance(data, list):
             for idx, val in enumerate(data):
@@ -65,7 +77,7 @@ class Magic:
 
         for arg in args:
             # 转换模版代码为真是数据值
-            target = eval(arg, dict(**data_factory, **params))
+            target = eval(arg, dict(**self.source, **params))
 
             if f"@<{arg}>" == origin:
                 return target
@@ -86,9 +98,23 @@ class Magic:
 
                 if args and f"@<{args[0]}>" == val:
                     try:
-                        target = eval(args[0], data_factory)
+                        target = eval(args[0], Render.source)
                     except:
                         pass
                     else:
                         if isinstance(target, list):
                             data[key] = target
+
+    @staticmethod
+    def render_string(string: str):
+        """
+        按照框架规则替换命令行参数到字符串
+        规则：字符串中 {xxx} 部分将被替换，如果 xxx 是命令行参数的话
+        """
+        args = re.findall(r"\{(.+?)\}", string)
+        for arg in args:
+            new = Render.config.getoption(arg)
+            if new:
+                string = string.replace("{" + arg + "}", new)
+
+        return string

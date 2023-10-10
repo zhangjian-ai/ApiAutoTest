@@ -13,9 +13,9 @@ class MySetup(Setup):
     """
 
     def before(self):
-        for product in self.config.im.products.keys():
+        for product in self.im.get("products").keys():
             if product == "httpbin":
-                p = getattr(self.config.im, product)
+                p = self.im.get(product)
                 for api in p.apis.values():
                     api["url"] = f"{self.config.getoption('host')}:{self.config.getoption('port')}{api['url']}"
 

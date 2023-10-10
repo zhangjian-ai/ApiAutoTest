@@ -7,12 +7,24 @@
 from abc import abstractmethod
 from _pytest.config import Config
 
+from config.settings import DATA_FACTORY
+from utils.framework.inner.loads import load_module_attrs
+from utils.framework.inner.support import InterfaceManager
+
 
 class Entry:
     """
-    入口类
+    核心基类
     """
+    source: dict = None
     config: Config = None
+    im: InterfaceManager = None
+
+    @classmethod
+    def assemble(cls, config: Config):
+        cls.config = config
+        cls.im = InterfaceManager()
+        cls.source = load_module_attrs(DATA_FACTORY)
 
 
 class Setup(Entry):

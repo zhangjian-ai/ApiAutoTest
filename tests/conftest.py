@@ -13,14 +13,14 @@ from _pytest.python import Metafunc
 from _pytest.runner import CallInfo
 from py._path.local import LocalPath
 
-from utils.framework.report import *
-from utils.framework.mail import Mail
-from utils.framework.magic import Magic
-from utils.framework.core import Entry, InterfaceManager
-from utils.framework.loads import load_case, load_yaml, load_fixture, render_string
-from utils.framework.runner import build_func, Executor, run_setup, run_teardown
-from config.settings import TEMP_DIR, BASE_DIR, TEST_CASE, SETUP_CLASS, TEARDOWN_CLASS, EMAIL_CONF, INIT_FILE, FIXTURES, \
-    REPORT_ENV
+from utils.framework.inner.report import *
+from utils.framework.inner.mail import Mail
+from utils.framework.inner.render import Render
+from utils.framework.inner.loads import load_case, load_yaml, load_fixture
+from utils.framework.inner.runner import build_func, Executor, run_setup, run_teardown
+from config.settings import TEMP_DIR, BASE_DIR, TEST_CASE, SETUP_CLASS, TEARDOWN_CLASS, EMAIL_CONF, FIXTURES, \
+    CMD_ARGS, DEBUG_FILE, REPORT_META_CONF, START_TIME
+from utils.framework.open.entry import Entry
 
 
 def pytest_addoption(parser: Parser):
@@ -28,26 +28,32 @@ def pytest_addoption(parser: Parser):
     命令行注册
     初始化时最先调用的Hook
     """
-    # 加载舒适化文件
-    conf = load_yaml(INIT_FILE)
+    # 需要注册的命令行参数转为字典
+    args = {key: "" for key in CMD_ARGS}
 
-    default = conf["default"]
+    # 加载调试配置
+    debug = load_yaml(DEBUG_FILE)
 
-    if conf.get("env"):
-        env_conf = conf.get(conf["env"])
+    if debug:
+        default = debug.get("default", {})
+        env = debug.get("env")
 
-        if env_conf:
+        if env:
+            env_conf = debug.get(env, {})
             default.update(env_conf)
 
+        # 将调试信息覆盖添加到 args
+        args.update(default)
+
     # 内置固定命令行
-    if "case" not in default:
+    if "case" not in args:
         parser.addoption("--case", action="store", default="")
 
-    if "branch" not in default:
+    if "branch" not in args:
         parser.addoption("--branch", action="store", default="master")
 
     # 注册命初始化令行
-    for key, value in default.items():
+    for key, value in args.items():
         parser.addoption(f"--{key}", action="store", default=value)
 
     # 注册邮箱配置参数
@@ -63,14 +69,8 @@ def pytest_configure(config: Config):
     # 测试进程开始
     log.info("测试进程启动")
 
-    # 测试开始时间
-    config.start_time = time.strftime('%Y-%m-%d %H:%M:%S')
-
-    # 接口管理
-    config.im = InterfaceManager()
-
-    # 为Entry类配置config
-    Entry.config = config
+    # 装载Entry
+    Entry.assemble(config)
 
     # 执行前置
     run_setup(SETUP_CLASS, config)
@@ -92,8 +92,13 @@ def pytest_sessionstart(session: Session):
     metadata = session.config._metadata
     metadata.clear()
 
-    for key, val in REPORT_ENV.items():
-        metadata[key] = render_string(val, session.config)
+    for key, val in REPORT_META_CONF.items():
+        metadata[key] = Render.render_string(val)
+
+    # 更新邮箱配置
+    for key in EMAIL_CONF.keys():
+        EMAIL_CONF[key] = Render.render_string(session.config.getoption(key))
+    EMAIL_CONF["start_time"] = START_TIME
 
 
 def pytest_pycollect_makemodule(path: LocalPath, parent: Collector):
@@ -138,7 +143,7 @@ def pytest_generate_tests(metafunc: Metafunc):
     # 参数化逻辑
     if parameters:
         # 参数值处理
-        Magic.trans_parameters(parameters)
+        Render.trans_parameters(parameters)
 
         # 将参数拆分成参数化对象
         keys = [key for key in parameters.keys()]
@@ -212,7 +217,7 @@ def pytest_sessionfinish(session: Session, exitstatus: int):
         # 测试报告也仅在主节点发送一次
         if hasattr(session.config, "_html"):
             with open(session.config._html.logfile, "r") as f:
-                Mail.send_mail(config=session.config, content=f.read(), annex_files=[session.config._html.logfile])
+                Mail.send_mail(config=EMAIL_CONF, content=f.read(), annex_files=[session.config._html.logfile])
 
         # 分布式测试时，在主节点执行数据清理逻辑
         log.info("执行测试后处理")
@@ -226,10 +231,10 @@ def pytest_sessionfinish(session: Session, exitstatus: int):
 
 
 @pytest.fixture()
-def executor(request: SubRequest, record_property):
+def executor(request: SubRequest):
     """
     用例执行器
     """
 
     # 返回一个执行器实例
-    return Executor(request, record_property)
+    return Executor.request_of(request)
