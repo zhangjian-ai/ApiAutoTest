@@ -1,9 +1,3 @@
-"""
-@Project: bot3-env-verify
-@File: tools.py
-@Author: Seeker
-@Date: 2023/7/10 11:53 下午
-"""
 import os
 import time
 import json
@@ -16,7 +10,77 @@ from google.protobuf import json_format
 from grpc._channel import _MultiThreadedRendezvous
 
 from config.settings import TEMP_DIR
-from utils.framework.open.logger import log
+from libs.framework.open.entry import Entry
+from libs.framework.open.logger import log
+
+
+class DbUtils:
+    """
+    数据库操作 工具类
+    """
+
+    @staticmethod
+    def query(sql: str = None):
+        """
+        装饰器
+        执行查询时使用，为自定义函数注入查询结果 List[Dict]
+
+        自定义函数形式通常应为：
+            @DbUtils.query("select * from ...")
+            def func(result: list[dict], params: list, size: int): ...
+
+        @param sql:
+        @return:
+        """
+
+        def outer(func):
+            @wraps(func)
+            def inner(*args, **kwargs):
+                # 获取参数
+                params = kwargs.get("params", None)
+                size = kwargs.get("size", 10)
+
+                if params and not isinstance(params, (tuple, list)):
+                    raise RuntimeError(f"params 参数类型错误, 当前类型 {type(params)}, 可接受的类型有 tuple list")
+
+                kwargs["result"] = Entry.mysql_pool.query(sql, params, size)
+
+                return func(*args, **kwargs)
+
+            return inner
+
+        return outer
+
+    @staticmethod
+    def modify(sql: str = None):
+        """
+        装饰器
+        执行增删改时使用，为自定义函数注入查询结果 int
+
+        自定义函数形式通常应为：
+            @DbUtils.query("insert into ...")
+            def func(result: list[dict], params: list[list]): ...
+
+        @param sql:
+        @return:
+        """
+
+        def outer(func):
+            @wraps(func)
+            def inner(*args, **kwargs):
+                # 获取参数
+                params = kwargs.get("params", None)
+
+                if params and isinstance(params, (tuple, list)):
+                    raise RuntimeError(f"params 参数类型错误, 当前类型 {type(params)}, 可接受的类型有 tuple list")
+
+                kwargs["result"] = Entry.mysql_pool.modify(sql, params)
+
+                return func(*args, **kwargs)
+
+            return inner
+
+        return outer
 
 
 def retry(count: int = 5, interval: int = 2, throw: bool = True):

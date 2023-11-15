@@ -3,7 +3,6 @@ import pytest
 import argparse
 import multiprocessing
 
-from utils.common import REPORT
 
 parser = argparse.ArgumentParser()
 
@@ -17,11 +16,11 @@ parser.add_argument("--nums", default=str(multiprocessing.cpu_count() // 2), hel
 args = parser.parse_args()
 
 # 自定义参数 命令行
-# 此变量衔接 entry.py 和 conftest.py 中的变量
+# 此变量衔接 run.py 和 conftest.py 中的变量
 custom = f"--host {args.host} --port {args.port}"
 
 # pytest 命令行
-line = f"--capture=sys -v --html {REPORT} --self-contained-html -n {args.nums} " \
+line = f"--capture=sys -v --html report/report.html --self-contained-html -n {args.nums} " \
        f"--reruns 1 --reruns-delay 3 -m {args.level} {custom}"
 
 # 运行测试进程

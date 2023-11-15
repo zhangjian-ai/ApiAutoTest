@@ -5,10 +5,11 @@ import importlib
 from types import ModuleType
 from inspect import isfunction, isclass
 from importlib.machinery import SourceFileLoader
+
 from google.protobuf.internal.python_message import GeneratedProtocolMessageType
 
 from config.settings import BASE_DIR
-from utils.framework.open.logger import log
+from libs.framework.open.logger import log
 
 
 def load_yaml(path) -> dict:
@@ -27,7 +28,7 @@ def load_yaml(path) -> dict:
     with open(path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
-    return data
+    return data or {}
 
 
 def load_case(target_dir, target: str) -> dict:
@@ -92,7 +93,7 @@ def load_case(target_dir, target: str) -> dict:
     return needs
 
 
-def load_interface_from_dir(path: str) -> dict:
+def load_interface(path: str) -> dict:
     """
     加载路径下所有接口文件中的接口信息
     """
@@ -110,9 +111,9 @@ def load_interface_from_dir(path: str) -> dict:
     return apis
 
 
-def load_module_attrs(modules: str or list) -> dict:
+def load_yours(modules: str or list) -> dict:
     """
-    返回路径下所有类、函数
+    返回路径下所有类、函数，并注入夹具
     """
     if not modules:
         return {}
@@ -148,12 +149,20 @@ def load_module_attrs(modules: str or list) -> dict:
 
     # 将所有模块中的 类、函数 导出
     attrs = dict()
+    conftest = importlib.import_module("tests.conftest")
     for module in all_module:
         for attr in dir(module):
             if not attr.startswith("_"):
                 unknown = getattr(module, attr)
-                # grpc消息类型也要导入
+
+                # 收集工具类和函数，包含grpc消息类型
                 if isclass(unknown) or isfunction(unknown) or isinstance(unknown, GeneratedProtocolMessageType):
+
+                    # 如果是 fixture，则直接注入到 conftest
+                    if hasattr(unknown, "_pytestfixturefunction"):
+                        setattr(conftest, attr, unknown)
+                        continue
+
                     attrs[attr] = getattr(module, attr)
 
     return attrs
@@ -174,23 +183,3 @@ def load_cls(path: str):
         raise RuntimeError(f"模块 {module} 中没有要找的类属性: {cls_name}")
 
     return getattr(module, cls_name)
-
-
-def load_fixture(path: str):
-    """
-    加载用户自定义fixture到conftest.py文件
-    """
-    if not path:
-        return
-
-    if path.endswith(".py"):
-        raise RuntimeError(f"自定义夹具文件路径非法: {path}")
-
-    source_module = importlib.import_module(path)
-
-    target_module = importlib.import_module("tests.conftest")
-
-    for unknown in dir(source_module):
-        if isfunction(getattr(source_module, unknown)):
-            log.info(f"注入自定义夹具: {unknown}")
-            setattr(target_module, unknown, getattr(source_module, unknown))

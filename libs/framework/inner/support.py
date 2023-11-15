@@ -5,7 +5,7 @@ from copy import deepcopy
 from collections import defaultdict
 
 from config.settings import API_FILE, BASE_DIR
-from utils.framework.inner.loads import load_interface_from_dir
+from libs.framework.inner.loads import load_interface
 
 
 class InterfaceManager:
@@ -45,7 +45,7 @@ class InterfaceManager:
             for conf in API_FILE:
                 self.products[conf["product"]] = \
                     InterfaceManager.Interface(name=conf["product"],
-                                               apis=load_interface_from_dir(os.path.join(BASE_DIR, conf["path"])))
+                                               apis=load_interface(os.path.join(BASE_DIR, conf["path"])))
 
     def get(self, item) -> dict or Interface:
         if item in ["products"]:

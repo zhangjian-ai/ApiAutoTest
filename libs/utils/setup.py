@@ -1,10 +1,4 @@
-"""
-@Project: api-auto-test
-@File: control.py
-@Author: Seeker
-@Date: 2023/7/9 12:34 下午
-"""
-from utils.framework.open.entry import Setup
+from libs.framework.open.entry import Setup
 
 
 class MySetup(Setup):

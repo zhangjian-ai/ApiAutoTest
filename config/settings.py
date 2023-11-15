@@ -38,17 +38,21 @@ API_FILE = [{"product": "httpbin", "path": "api/httpbin"}]
 TEST_CASE = "data/demo"
 
 # 数据工厂路径。测试用例中使用的 模版类、模版函数 均应在数据工厂实现
-DATA_FACTORY = "utils/factory"
+CUSTOM_UTILS = "libs/utils"
 
-# 前置类。必须继承 utils.framework.core.Setup 类
-# 示例: utils.control.control.CustomSetup
-SETUP_CLASS = "utils.control.setup.MySetup"
+# 前置类。必须继承 libs.framework.core.Setup 类
+SETUP_CLASS = "libs.utils.setup.MySetup"
 
-# 后置类。必须继承 utils.framework.core.Teardown 类
+# 后置类。必须继承 libs.framework.core.Teardown 类
 TEARDOWN_CLASS = ""
 
-# 自定义夹具模块导包路径
-FIXTURES = "utils.fixtures.fixtures"
+# 数据库连接配置
+DB_CONF = {
+    "db_host": "your host",
+    "db_port": 3306,
+    "db_user": "root",
+    "db_pwd": "your password"
+}
 
 # 邮件服务器配置，参数key不可修改
 EMAIL_CONF = {

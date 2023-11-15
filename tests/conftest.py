@@ -13,14 +13,15 @@ from _pytest.python import Metafunc
 from _pytest.runner import CallInfo
 from py._path.local import LocalPath
 
-from utils.framework.inner.report import *
-from utils.framework.inner.mail import Mail
-from utils.framework.inner.render import Render
-from utils.framework.inner.loads import load_case, load_yaml, load_fixture
-from utils.framework.inner.runner import build_func, Executor, run_setup, run_teardown
-from config.settings import TEMP_DIR, BASE_DIR, TEST_CASE, SETUP_CLASS, TEARDOWN_CLASS, EMAIL_CONF, FIXTURES, \
-    CMD_ARGS, DEBUG_FILE, REPORT_META_CONF, START_TIME
-from utils.framework.open.entry import Entry
+from libs.framework.inner.report import *
+from libs.framework.inner.mail import Mail
+from libs.framework.inner.render import Render
+from libs.framework.inner.loads import load_case, load_yaml
+from libs.framework.inner.runner import build_func, Executor, run_setup, run_teardown
+from config.settings import TEMP_DIR, BASE_DIR, TEST_CASE, SETUP_CLASS, TEARDOWN_CLASS, EMAIL_CONF,\
+    CMD_ARGS, DEBUG_FILE, REPORT_META_CONF, START_TIME, DB_CONF
+from libs.framework.open.entry import Entry
+from libs.framework.open.logger import log
 
 
 def pytest_addoption(parser: Parser):
@@ -58,7 +59,13 @@ def pytest_addoption(parser: Parser):
 
     # 注册邮箱配置参数
     for key, value in EMAIL_CONF.items():
-        parser.addoption(f"--{key}", action="store", default=value)
+        if key not in args:
+            parser.addoption(f"--{key}", action="store", default=value)
+
+    # 注册数据库配置
+    for key, value in DB_CONF.items():
+        if key not in args:
+            parser.addoption(f"--{key}", action="store", default=value)
 
 
 def pytest_configure(config: Config):
@@ -74,9 +81,6 @@ def pytest_configure(config: Config):
 
     # 执行前置
     run_setup(SETUP_CLASS, config)
-
-    # 加载自定义夹具
-    load_fixture(FIXTURES)
 
 
 def pytest_sessionstart(session: Session):
@@ -226,6 +230,8 @@ def pytest_sessionfinish(session: Session, exitstatus: int):
         # 删除测试临时目录
         if os.path.exists(TEMP_DIR):
             os.system(f"rm -rf {TEMP_DIR}")
+
+    Entry.close()
 
     log.info(f"测试进程结束，Exit Code:{exitstatus}")
 

@@ -16,11 +16,11 @@ from types import FunctionType
 from _pytest.config import Config
 from _pytest.fixtures import SubRequest
 
-from utils.framework.open.logger import log
-from utils.framework.inner.render import Render
-from utils.framework.inner.loads import load_cls
-from utils.framework.open.entry import Setup, Teardown, Entry
-from utils.framework.open.helper import http_request, protobuf_to_dict
+from libs.framework.open.logger import log
+from libs.framework.inner.render import Render
+from libs.framework.inner.loads import load_cls
+from libs.framework.open.entry import Setup, Teardown, Entry
+from libs.framework.open.helper import http_request, protobuf_to_dict
 
 
 def build_func(name: str, extend_fixtures: list):
@@ -368,7 +368,7 @@ class Executor(Entry):
         target_steps = []
 
         for step in origin_steps:
-            param = step.get("param", None)
+            param = step.pop("param", None)
 
             if param:
                 Render.trans_parameters(param)

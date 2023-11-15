@@ -1,7 +1,7 @@
 import re
 import pytest
 
-from utils.framework.open.entry import Entry
+from libs.framework.open.entry import Entry
 
 
 class Render(Entry):

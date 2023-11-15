@@ -1,30 +1,40 @@
-"""
-@Project: bot3-env-verify
-@File: entry.py
-@Author: Seeker
-@Date: 2023/7/10 11:44 下午
-"""
 from abc import abstractmethod
 from _pytest.config import Config
 
-from config.settings import DATA_FACTORY
-from utils.framework.inner.loads import load_module_attrs
-from utils.framework.inner.support import InterfaceManager
+from config.settings import CUSTOM_UTILS
+from libs.framework.inner.db import MysqlConnPool
+from libs.framework.inner.loads import load_yours
+from libs.framework.inner.support import InterfaceManager
 
 
 class Entry:
     """
-    核心基类
+    纯纯基类
     """
     source: dict = None
     config: Config = None
     im: InterfaceManager = None
+    mysql_pool: MysqlConnPool = None
 
     @classmethod
     def assemble(cls, config: Config):
         cls.config = config
+
+        # 接口管理实例
         cls.im = InterfaceManager()
-        cls.source = load_module_attrs(DATA_FACTORY)
+
+        # 收集所有的工具类及方法，放到一个字典中
+        # 同时注入 fixture 到 conftest
+        cls.source = load_yours(CUSTOM_UTILS)
+
+        # mysql 连接池
+        # cls.mysql_pool = MysqlConnPool(host=config.getoption("db_host"), port=config.getoption("db_port"),
+        #                                user=config.getoption("db_user"), password=config.getoption("db_pwd"))
+
+    @classmethod
+    def close(cls):
+        if cls.mysql_pool:
+            cls.mysql_pool.close()
 
 
 class Setup(Entry):

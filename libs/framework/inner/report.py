@@ -3,7 +3,7 @@ import pytest
 
 from py.xml import html
 
-from utils.framework.open.logger import log
+from libs.framework.open.logger import log
 
 """
 设置html报告样式
