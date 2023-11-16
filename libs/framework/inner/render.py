@@ -32,32 +32,23 @@ class Render(Entry):
         将对象data中模版语法转换成真是数据
         """
         if isinstance(data, dict):
-            # 增加处理 sign 签名的逻辑
-            sign = data.pop("sign", None)
-
             for key, val in data.items():
-                if not val or isinstance(val, (int, float)):
+                if not val:
                     continue
-                elif isinstance(val, str):
-                    data[key] = self._magic_(val)
-                else:
-                    self.trans(val)
 
-            # 处理签名
-            if sign is not None:
-                if isinstance(sign, str):
-                    self.sp['data'] = data
-                    data["sign"] = self._magic_(sign)
-                else:
-                    data["sign"] = sign
+                if isinstance(val, str):
+                    data[key] = self._magic_(val)
+                elif isinstance(val, (dict, list)):
+                    self.trans(val)
 
         elif isinstance(data, list):
             for idx, val in enumerate(data):
-                if isinstance(val, (int, float)):
+                if not val:
                     continue
-                elif isinstance(val, str):
+
+                if isinstance(val, str):
                     data[idx] = self._magic_(val)
-                else:
+                elif isinstance(val, (dict, list)):
                     self.trans(val)
         else:
             pytest.fail(f"trans方法入参类型错误: {type(data)}， 默认只接受 list、dict")
