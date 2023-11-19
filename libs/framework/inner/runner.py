@@ -31,7 +31,7 @@ class Control(Entry):
         """
         根据用户配置的 Setup 类 执行前置操作
         """
-        for setup in cls.controllers.get("__setup__"):
+        for setup in cls.controllers.get("__setup__", []):
             if not issubclass(setup, Setup):
                 raise RuntimeError(f"自定义前置类不是 Setup 子类: {setup}")
 
@@ -55,7 +55,7 @@ class Control(Entry):
         """
         根据用户配置的 Teardown 类 执行后置操作
         """
-        for teardown in cls.controllers.get("__teardown__"):
+        for teardown in cls.controllers.get("__teardown__", []):
             if not issubclass(teardown, Teardown):
                 raise RuntimeError(f"自定义后置类不是 Teardown 子类: {teardown}")
 
