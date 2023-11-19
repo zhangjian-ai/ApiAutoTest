@@ -1,9 +1,9 @@
 from abc import abstractmethod
 from _pytest.config import Config
 
-from config.settings import CUSTOM_UTILS
+from libs.framework.settings import CUSTOM_UTILS
 from libs.framework.inner.db import MysqlConnPool
-from libs.framework.inner.loads import load_yours
+from libs.framework.inner.loads import scan_custom
 from libs.framework.inner.support import InterfaceManager
 
 
@@ -12,6 +12,8 @@ class Entry:
     纯纯基类
     """
     source: dict = None
+    fixtures: list = None
+    controllers: dict = None
     config: Config = None
     im: InterfaceManager = None
     mysql_pool: MysqlConnPool = None
@@ -23,9 +25,8 @@ class Entry:
         # 接口管理实例
         cls.im = InterfaceManager()
 
-        # 收集所有的工具类及方法，放到一个字典中
-        # 同时注入 fixture 到 conftest
-        cls.source = load_yours(CUSTOM_UTILS)
+        # 收集所有的工具类及方法
+        cls.source, cls.fixtures, cls.controllers = scan_custom(CUSTOM_UTILS)
 
         # mysql 连接池
         # cls.mysql_pool = MysqlConnPool(host=config.getoption("db_host"), port=config.getoption("db_port"),
@@ -41,6 +42,8 @@ class Setup(Entry):
     """
     前置基类
     """
+    # 前置类标识
+    __setup__ = "session"
 
     @abstractmethod
     def before(self):
@@ -67,6 +70,8 @@ class Teardown(Entry):
     """
     后置基类
     """
+    # 后置类标识
+    __teardown__ = "session"
 
     @abstractmethod
     def after(self):

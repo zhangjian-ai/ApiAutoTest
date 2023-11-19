@@ -13,13 +13,10 @@ BASE_NAME = "接口自动化测试"
 START_TIME = time.strftime('%Y-%m-%d %H:%M:%S')
 
 # 项目根路径
-BASE_DIR = Path(__file__).resolve().parent.parent.__str__()
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.__str__()
 
 # 初始化参数配置文件
-DEBUG_FILE = os.path.join(BASE_DIR, "config", "init.yaml")
-
-# pytest 需要注册的命令行参数。注册时都注册为 字符串，默认是是 ""
-CMD_ARGS = ["host", "port", "username", "password", "branch"]
+DEBUG_FILE = os.path.join(BASE_DIR, "init.yaml")
 
 # 测试过程中临时文件存放路径
 TEMP_DIR = os.path.join(BASE_DIR, "temporary")
@@ -40,11 +37,17 @@ TEST_CASE = "data/demo"
 # 数据工厂路径。测试用例中使用的 模版类、模版函数 均应在数据工厂实现
 CUSTOM_UTILS = "libs/utils"
 
-# 前置类。必须继承 libs.framework.core.Setup 类
-SETUP_CLASS = "libs.utils.setup.MySetup"
 
-# 后置类。必须继承 libs.framework.core.Teardown 类
-TEARDOWN_CLASS = ""
+###################### 以下配置将注册为 pytest 命令行参数 ######################
+
+# 基础命令行参数。基础参数可以被其他配置通过 {参数名} 的方式引用
+CMD_ARGS = {
+    "branch": "master",
+    "host": None,
+    "port": None,
+    "username": None,
+    "password": None
+}
 
 # 数据库连接配置
 DB_CONF = {

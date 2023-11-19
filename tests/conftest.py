@@ -17,8 +17,8 @@ from libs.framework.inner.report import *
 from libs.framework.inner.mail import Mail
 from libs.framework.inner.render import Render
 from libs.framework.inner.loads import load_case, load_yaml
-from libs.framework.inner.runner import build_func, Executor, run_setup, run_teardown
-from config.settings import TEMP_DIR, BASE_DIR, TEST_CASE, SETUP_CLASS, TEARDOWN_CLASS, EMAIL_CONF,\
+from libs.framework.inner.runner import Executor, CapabilitySupport, Control
+from libs.framework.settings import TEMP_DIR, BASE_DIR, TEST_CASE, EMAIL_CONF,\
     CMD_ARGS, DEBUG_FILE, REPORT_META_CONF, START_TIME, DB_CONF
 from libs.framework.open.entry import Entry
 from libs.framework.open.logger import log
@@ -30,7 +30,7 @@ def pytest_addoption(parser: Parser):
     初始化时最先调用的Hook
     """
     # 需要注册的命令行参数转为字典
-    args = {key: "" for key in CMD_ARGS}
+    args = {key: val for key, val in CMD_ARGS.items()}
 
     # 加载调试配置
     debug = load_yaml(DEBUG_FILE)
@@ -80,7 +80,10 @@ def pytest_configure(config: Config):
     Entry.assemble(config)
 
     # 执行前置
-    run_setup(SETUP_CLASS, config)
+    Control.run_setup()
+
+    # 注入自定义夹具
+    Control.inject_fixture()
 
 
 def pytest_sessionstart(session: Session):
@@ -122,7 +125,7 @@ def pytest_pycollect_makemodule(path: LocalPath, parent: Collector):
 
         # 构建用例
         for key, val in cases.items():
-            setattr(module, key, build_func(key, extend_fixtures=val.get("spec", {}).get("fixtures", [])))
+            setattr(module, key, CapabilitySupport.build_func(key, extend_fixtures=val.get("spec", {}).get("fixtures", [])))
 
         # 传递测试数据
         parent.config.cases = cases
@@ -225,7 +228,7 @@ def pytest_sessionfinish(session: Session, exitstatus: int):
 
         # 分布式测试时，在主节点执行数据清理逻辑
         log.info("执行测试后处理")
-        run_teardown(TEARDOWN_CLASS)
+        Control.run_teardown()
 
         # 删除测试临时目录
         if os.path.exists(TEMP_DIR):

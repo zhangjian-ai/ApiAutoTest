@@ -8,7 +8,7 @@ from importlib.machinery import SourceFileLoader
 
 from google.protobuf.internal.python_message import GeneratedProtocolMessageType
 
-from config.settings import BASE_DIR
+from libs.framework.settings import BASE_DIR
 from libs.framework.open.logger import log
 
 
@@ -111,12 +111,16 @@ def load_interface(path: str) -> dict:
     return apis
 
 
-def load_yours(modules: str or list) -> dict:
+def scan_custom(modules: str or list) -> tuple:
     """
-    返回路径下所有类、函数，并注入夹具
+    扫描自定义 工具类、函数
     """
+    utils = dict()
+    fixtures = list()
+    controllers = dict()
+
     if not modules:
-        return {}
+        return utils, fixtures, controllers
 
     # 先倒入模块
     all_module = []
@@ -148,38 +152,30 @@ def load_yours(modules: str or list) -> dict:
                     all_module.append(module)
 
     # 将所有模块中的 类、函数 导出
-    attrs = dict()
-    conftest = importlib.import_module("tests.conftest")
     for module in all_module:
         for attr in dir(module):
             if not attr.startswith("_"):
                 unknown = getattr(module, attr)
 
                 # 收集工具类和函数，包含grpc消息类型
-                if isclass(unknown) or isfunction(unknown) or isinstance(unknown, GeneratedProtocolMessageType):
-
-                    # 如果是 fixture，则直接注入到 conftest
-                    if hasattr(unknown, "_pytestfixturefunction"):
-                        setattr(conftest, attr, unknown)
+                if isclass(unknown):
+                    if hasattr(unknown, "__setup__"):
+                        controllers.setdefault("__setup__", []).append(unknown)
                         continue
 
-                    attrs[attr] = getattr(module, attr)
+                    if hasattr(unknown, "__teardown__"):
+                        controllers.setdefault("__teardown__", []).append(unknown)
+                        continue
 
-    return attrs
+                    utils[attr] = unknown
 
+                elif isfunction(unknown):
+                    if hasattr(unknown, "_pytestfixturefunction"):
+                        fixtures.append(unknown)
+                        continue
+                    utils[attr] = unknown
 
-def load_cls(path: str):
-    """
-    根据导包路径，返回 类
-    """
-    module_path, cls_name = path.rsplit(".", 1)
+                elif isinstance(unknown, GeneratedProtocolMessageType):
+                    utils[attr] = unknown
 
-    module = importlib.import_module(module_path)
-
-    if not isinstance(module, ModuleType):
-        raise RuntimeError(f"导包路径错误: {path}")
-
-    if not hasattr(module, cls_name):
-        raise RuntimeError(f"模块 {module} 中没有要找的类属性: {cls_name}")
-
-    return getattr(module, cls_name)
+    return utils, fixtures, controllers
