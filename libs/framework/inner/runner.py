@@ -33,7 +33,7 @@ class Control(Entry):
         """
         for setup in cls.controllers.get("__setup__"):
             if not issubclass(setup, Setup):
-                raise RuntimeError(f"自定义前置类不是 Setup 子类: {cls}")
+                raise RuntimeError(f"自定义前置类不是 Setup 子类: {setup}")
 
             cls.config.setup = setup()
 
@@ -57,7 +57,7 @@ class Control(Entry):
         """
         for teardown in cls.controllers.get("__teardown__"):
             if not issubclass(teardown, Teardown):
-                raise RuntimeError(f"自定义后置类不是 Teardown 子类: {cls}")
+                raise RuntimeError(f"自定义后置类不是 Teardown 子类: {teardown}")
 
             # 执行后置工作
             teardown().after()
