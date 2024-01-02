@@ -1,14 +1,12 @@
 import os
 import yaml
-import importlib
 
-from types import ModuleType
 from inspect import isfunction, isclass
 from importlib.machinery import SourceFileLoader
 
 from google.protobuf.internal.python_message import GeneratedProtocolMessageType
 
-from libs.framework.settings import BASE_DIR
+from libs.settings import BASE_DIR
 from libs.framework.open.logger import log
 
 
@@ -62,7 +60,7 @@ def load_case(target_dir, target: str) -> dict:
                 all_case_name.append(key)
 
                 # 在用例信息中添加文件名称
-                val.get("info", {})["origin"] = file_path.replace(BASE_DIR, "")[1:]
+                val.get("meta", {})["origin"] = file_path.replace(BASE_DIR, "")[1:]
 
             all_data[file] = details
 
@@ -116,7 +114,7 @@ def scan_custom(modules: str or list) -> tuple:
     扫描自定义 工具类、函数
     """
     utils = dict()
-    fixtures = list()
+    fixtures = dict()
     controllers = dict()
 
     if not modules:
@@ -171,7 +169,7 @@ def scan_custom(modules: str or list) -> tuple:
 
                 elif isfunction(unknown):
                     if hasattr(unknown, "_pytestfixturefunction"):
-                        fixtures.append(unknown)
+                        fixtures[attr] = unknown
                         continue
                     utils[attr] = unknown
 

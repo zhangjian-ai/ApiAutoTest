@@ -4,7 +4,7 @@ import threading
 from copy import deepcopy
 from collections import defaultdict
 
-from libs.framework.settings import API_FILE, BASE_DIR
+from libs.settings import API_FILE, BASE_DIR
 from libs.framework.inner.loads import load_interface
 
 

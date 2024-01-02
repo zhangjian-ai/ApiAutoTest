@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from _pytest.config import Config
 
-from libs.framework.settings import CUSTOM_UTILS
+from libs.settings import CUSTOM_UTILS
 from libs.framework.inner.db import MysqlConnPool
 from libs.framework.inner.loads import scan_custom
 from libs.framework.inner.support import InterfaceManager
@@ -12,7 +12,7 @@ class Entry:
     纯纯基类
     """
     source: dict = None
-    fixtures: list = None
+    fixtures: dict = None
     controllers: dict = None
     config: Config = None
     im: InterfaceManager = None

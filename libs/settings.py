@@ -13,10 +13,10 @@ BASE_NAME = "接口自动化测试"
 START_TIME = time.strftime('%Y-%m-%d %H:%M:%S')
 
 # 项目根路径
-BASE_DIR = Path(__file__).resolve().parent.parent.parent.__str__()
+BASE_DIR = Path(__file__).resolve().parent.parent.__str__()
 
 # 初始化参数配置文件
-DEBUG_FILE = os.path.join(BASE_DIR, "init.yaml")
+DEBUG_FILE = os.path.join(BASE_DIR, "libs", "settings.yaml")
 
 # 测试过程中临时文件存放路径
 TEMP_DIR = os.path.join(BASE_DIR, "temporary")
@@ -32,7 +32,7 @@ TEMP_DIR = os.path.join(BASE_DIR, "temporary")
 API_FILE = [{"product": "httpbin", "path": "api/httpbin"}]
 
 # 测试用例目录
-TEST_CASE = "data/demo"
+TEST_CASE = "data"
 
 # 数据工厂路径。测试用例中使用的 模版类、模版函数 均应在数据工厂实现
 CUSTOM_UTILS = "libs/utils"

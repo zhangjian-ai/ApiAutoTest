@@ -47,7 +47,7 @@ class Control(Entry):
         """
         module = importlib.import_module("tests.conftest")
 
-        for fixture in cls.fixtures:
+        for fixture in cls.fixtures.values():
             setattr(module, fixture.__name__, fixture)
 
     @classmethod
@@ -337,12 +337,12 @@ class Executor(Entry):
         self.magic = Render(deepcopy(self.data.get("param", {})))
 
         # 记录用例描述信息
-        info = deepcopy(self.data.get("info", {}))
+        meta = deepcopy(self.data.get("meta", {}))
 
-        info["params"] = self.magic.cp
-        info["start_time"] = time.strftime('%Y-%m-%d %H:%M:%S')
+        meta["params"] = self.magic.cp
+        meta["start_time"] = time.strftime('%Y-%m-%d %H:%M:%S')
 
-        [request.node.user_properties.append((key, val)) for key, val in info.items()]
+        [request.node.user_properties.append((key, val)) for key, val in meta.items()]
 
     @staticmethod
     def _validator(func_name, spec, branch):

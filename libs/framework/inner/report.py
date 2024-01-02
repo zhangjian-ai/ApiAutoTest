@@ -1,4 +1,6 @@
 import time
+import traceback
+
 import pytest
 
 from py.xml import html
@@ -86,12 +88,13 @@ def pytest_html_results_table_row(report, cells):
             cells.insert(7, html.td(html.span(properties.get('time', ""), style_="color: black")))
 
         except Exception as e:
-            log.error(str(e))
+            traceback.print_exc()
 
 
 @pytest.mark.optionalhook
 def pytest_html_results_table_html(report, data):
     # 通过的用例不记录日志
-    if report.passed:
-        data.clear()
-        data.append(html.div("we will not record log for passed case.", class_="empty log"))
+    # if report.passed:
+    #     data.clear()
+    #     data.append(html.div("we will not record log for passed case.", class_="empty log"))
+    pass

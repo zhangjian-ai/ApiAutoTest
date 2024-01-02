@@ -9,7 +9,7 @@ from functools import wraps
 from google.protobuf import json_format
 from grpc._channel import _MultiThreadedRendezvous
 
-from libs.framework.settings import TEMP_DIR
+from libs.settings import TEMP_DIR
 from libs.framework.open.entry import Entry
 from libs.framework.open.logger import log
 

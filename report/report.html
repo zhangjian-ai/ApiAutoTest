@@ -1534,18 +1534,18 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
 }
 </script>
     <h1>自动化接口测试报告</h1>
-    <p>Report generated on 11-Jul-2023 at 12:42:24 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
+    <p>Report generated on 02-Jan-2024 at 15:28:42 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
     <h2>Environment</h2>
     <table id="environment">
       <tr>
         <td>测试时间</td>
-        <td>2023-07-11 12:40:50</td></tr>
+        <td>2024-01-02 15:28:36</td></tr>
       <tr>
         <td>项目名称</td>
         <td>接口自动化测试</td></tr></table>
     <h2>Summary</h2>
-    <p>6 tests ran in 94.01 seconds. </p>
-    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">5 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">1 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>, <input checked="true" class="filter" data-test-result="rerun" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="rerun">0 rerun</span>
+    <p>6 tests ran in 5.84 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">6 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">0 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>, <input checked="true" class="filter" data-test-result="rerun" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="rerun">0 rerun</span>
     <h2>Results</h2>
     <table id="results-table">
       <thead id="results-table-head">
@@ -1553,83 +1553,19 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
           <th class="sortable result initial-sort" col="result">Result</th>
           <th class="sortable" col="name">Test</th>
           <th class="sortable" col="duration">Duration</th>
-          <th class="sortable time" col="time">Time</th>
+          <th class="sortable time" col="time">StartTime</th>
           <th>用例描述</th>
           <th>作者</th>
           <th>用例等级</th>
           <th>更新时间</th></tr>
         <tr hidden="true" id="not-found-message">
           <th colspan="8">No results found. Try to check the filters</th></tr></thead>
-      <tbody class="failed results-table-row">
-        <tr>
-          <td class="col-result">Failed</td>
-          <td><span style="color: saddlebrown">data/demo/test_demo.yaml::test_demo_02[参数化演示用例 - 1]</span></td>
-          <td><span style="color: black">64.62</span></td>
-          <td>
-            <p class="col-time">07-11 12:42:24</p></td>
-          <td>
-            <p style="font-weight: 400; color: black; margin: 0">参数化演示用例</p>
-            <div><span style="color: green">| text : </span><span style="color: peru">参数化随机文本: 如果本站</span></div>
-            <div><span style="color: green">| answer : </span><span style="color: peru">其徐如林</span></div></td>
-          <td><span style="color: black">goodman</span></td>
-          <td><span style="color: black">P1</span></td>
-          <td><span style="color: black">2022.10.26</span></td></tr>
-        <tr class="collapsed">
-          <td class="extra" colspan="8">
-            <div class="log">executor = &lt;utils.framework.runner.Executor object at 0x103427820&gt;<br/><br/>&gt;   ???<br/><br/>test_demo_02:2: <br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ <br/>utils/framework/runner.py:387: in schedule<br/>    self.magic.r.append(call(self.config.im, step))<br/>utils/framework/runner.py:288: in call<br/>    raise e<br/>utils/framework/runner.py:282: in call<br/>    verify(expect, response)<br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ <br/><br/>expect = {&#x27;status_code&#x27;: 200}, response = {&#x27;status_code&#x27;: 504}<br/><br/>    def verify(expect: dict, response: dict):<br/>        &quot;&quot;&quot;<br/>        验证 expect 中的键值是否都能在 response 中找到且一致<br/>        &quot;&quot;&quot;<br/>    <br/>        # 验证实际结果是否与预期一致<br/>        for key, value in expect.items():<br/>            # 比较运算处理<br/>            if key in (&quot;&lt;&quot;, &quot;&gt;&quot;, &quot;==&quot;, &quot;&gt;=&quot;, &quot;&lt;=&quot;, &quot;!=&quot;):<br/>                real_value = response<br/>                if not isinstance(response, (int, float, str)):<br/>                    real_value = len(response)<br/>    <br/>                if isinstance(real_value, str):<br/>                    real_value = f&quot;&#x27;{real_value}&#x27;&quot;<br/>                if isinstance(value, str):<br/>                    value = f&quot;&#x27;{value}&#x27;&quot;<br/>    <br/>                assert eval(f&quot;{real_value} {key} {value}&quot;), f&#x27;\n&#x27; \<br/>                                                            f&#x27;KEY: {key} \n&#x27; \<br/>                                                            f&#x27;运算符: {key} &#x27; \<br/>                                                            f&#x27;(如果实际返回值是一个对象，那么此时检验的是对象的长度) \n&#x27; \<br/>                                                            f&#x27;预期值: {value}\n&#x27; \<br/>                                                            f&#x27;实际值: {real_value}\n&#x27; \<br/>                                                            f&#x27;返回值: {response}\n&#x27;<br/>    <br/>            # 包含关系<br/>            elif key in (&quot;in&quot;, &quot;not in&quot;):<br/>                if not isinstance(response, (list, str, dict)):<br/>                    assert False, f&#x27;\n&#x27; \<br/>                                  f&#x27;KEY: {key} \n&#x27; \<br/>                                  f&#x27;运算符: {key} &#x27; \<br/>                                  f&#x27;预期值: {value}\n&#x27; \<br/>                                  f&#x27;实际值: {response} 的类型不支持包含关系运算\n&#x27;<br/>    <br/>                elif isinstance(value, dict):<br/>                    _verify_list(key, [value], response, operate=key)<br/>    <br/>                elif isinstance(value, (list, tuple)):<br/>                    _verify_list(key, value, response, operate=key)<br/>    <br/>                else:<br/>                    if isinstance(value, str):<br/>                        value = f&quot;&#x27;{value}&#x27;&quot;<br/>                    if isinstance(response, str):<br/>                        response = f&quot;&#x27;{response}&#x27;&quot;<br/>    <br/>                    assert eval(f&quot;{value} {key} {response}&quot;), f&#x27;\n&#x27; \<br/>                                                              f&#x27;KEY: {key} \n&#x27; \<br/>                                                              f&#x27;运算符: {key} &#x27; \<br/>                                                              f&#x27;预期值: {value}\n&#x27; \<br/>                                                              f&#x27;实际值: {response}\n&#x27; \<br/>                                                              f&#x27;包含关系运算结果不为真&#x27;<br/>    <br/>            # any 预期列表中任意一个值在实际响应中就算通过<br/>            elif key in (&quot;any&quot;,):<br/>                # 使用 any 时，要求预期值是列表或元组<br/>                assert isinstance(value, (list, tuple)), f&#x27;\n&#x27; \<br/>                                                         f&#x27;KEY: {key} \n&#x27; \<br/>                                                         f&#x27;预期值: {value} \n&#x27; \<br/>                                                         f&#x27;使用 any 关键字时，要求预期值是列表或元组&#x27;<br/>                success = False<br/>                # 将预期值依次放入列表校验，直到校验成功<br/>                for sub_val in value:<br/>                    try:<br/>                        _verify_list(key, [sub_val], response)<br/>                        success = True<br/>                        break<br/>                    except AssertionError:<br/>                        pass<br/>    <br/>                assert success, f&#x27;\n&#x27; \<br/>                                f&#x27;KEY: {key} \n&#x27; \<br/>                                f&#x27;预期值: {value} \n&#x27; \<br/>                                f&#x27;预期值: {response} \n&#x27; \<br/>                                f&#x27;预期结果中没有任何值在实际列表中存在&#x27;<br/>    <br/>            # 如果预期值是str、int、float那么就直接对比<br/>            elif isinstance(value, (str, int, float)):<br/>&gt;               assert isinstance(response, dict) \<br/>                       and value == response.get(key), f&#x27;\n&#x27; \<br/>                                                       f&#x27;KEY: {key} \n&#x27; \<br/>                                                       f&#x27;预期结果: {json.dumps(expect, indent=2, ensure_ascii=False)}\n&#x27; \<br/>                                                       f&#x27;实际结果: {json.dumps(response, indent=2, ensure_ascii=False)}\n&#x27;<br/><span class="error">E               AssertionError: </span><br/><span class="error">E               KEY: status_code </span><br/><span class="error">E               预期结果: {</span><br/><span class="error">E                 &quot;status_code&quot;: 200</span><br/><span class="error">E               }</span><br/><span class="error">E               实际结果: {</span><br/><span class="error">E                 &quot;status_code&quot;: 504</span><br/><span class="error">E               }</span><br/><br/>utils/framework/runner.py:154: AssertionError<br/> -----------------------------Captured stdout setup------------------------------ <br/>
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:40:59</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">inspect</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">339</span><span class="ansi34"></span> - 执行用例: test_demo_02 &lt;参数化演示用例&gt;
-<br/> ------------------------------Captured stdout call------------------------------ <br/>
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:40:59</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">schedule</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">384</span><span class="ansi34"></span> - Step 1: 参数化演示 - 其徐如林 - 第一次执行: 参数化随机文本: 如果本站
-
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:40:59</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">72</span><span class="ansi34"></span> - 请求地址: http://httpbin.org:80/post
-
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:40:59</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">73</span><span class="ansi34"></span> - 请求方式: POST
-
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:40:59</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">74</span><span class="ansi34"></span> - 请求头: {&#x27;Content-Type&#x27;: &#x27;application/json&#x27;}
-
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:40:59</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">75</span><span class="ansi34"></span> - 查询参数: None
-
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:40:59</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">76</span><span class="ansi34"></span> - 表单参数: {&#x27;key&#x27;: &#x27;第一次执行: 参数化随机文本: 如果本站&#x27;, &#x27;val&#x27;: &#x27;其徐如林&#x27;}
-
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:41:53</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">93</span><span class="ansi34"></span> - 状态码: 200
-
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:41:53</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">119</span><span class="ansi34"></span> - 响应结果: {&#x27;args&#x27;: {}, &#x27;data&#x27;: &#x27;{&quot;key&quot;: &quot;\\u7b2c\\u4e00\\u6b21\\u6267\\u884c: \\u53c2\\u6570\\u5316\\u968f\\u673a\\u6587\\u672c: \\u5982\\u679c\\u672c\\u7ad9&quot;, &quot;val&quot;: &quot;\\u5176\\u5f90\\u5982\\u6797&quot;}&#x27;, &#x27;files&#x27;: {}, &#x27;form&#x27;: {}, &#x27;headers&#x27;: {&#x27;Accept&#x27;: &#x27;*/*&#x27;, &#x27;Accept-Encoding&#x27;: &#x27;gzip, deflate&#x27;, &#x27;Content-Length&#x27;: &#x27;146&#x27;, &#x27;Content-Type&#x27;: &#x27;application/json&#x27;, &#x27;Host&#x27;: &#x27;httpbin.org&#x27;, &#x27;User-Agent&#x27;: &#x27;python-requests/2.28.1&#x27;, &#x27;X-Amzn-Trace-Id&#x27;: &#x27;Root=1-64acdd5c-5dc7d5a85670f7bf13ac557e&#x27;}, &#x27;json&#x27;: {&#x27;key&#x27;: &#x27;第一次执行: 参数化随机文本: 如果本站&#x27;, &#x27;val&#x27;: &#x27;其徐如林&#x27;}, &#x27;origin&#x27;: &#x27;118.112.74.189&#x27;, &#x27;url&#x27;: &#x27;http://httpbin.org/post&#x27;, &#x27;status_code&#x27;: 200}
-
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:41:53</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">schedule</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">384</span><span class="ansi34"></span> - Step 2: 参数化演示 - 其徐如林 - 第二次执行: 参数化随机文本: 如果本站
-
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:41:53</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">72</span><span class="ansi34"></span> - 请求地址: http://httpbin.org:80/post
-
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:41:53</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">73</span><span class="ansi34"></span> - 请求方式: POST
-
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:41:53</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">74</span><span class="ansi34"></span> - 请求头: {&#x27;Content-Type&#x27;: &#x27;application/json&#x27;}
-
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:41:53</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">75</span><span class="ansi34"></span> - 查询参数: None
-
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:41:53</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">76</span><span class="ansi34"></span> - 表单参数: {&#x27;key&#x27;: &#x27;第二次执行: 参数化随机文本: 如果本站&#x27;, &#x27;val&#x27;: &#x27;季布&#x27;}
-
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:42:04</span><span class="ansi36"></span> | <span class="ansi31"></span><span class="ansi1 ansi31">ERROR  </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">89</span><span class="ansi34"></span> - 响应结果解析异常: Expecting value: line 1 column 1 (char 0)
-
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:42:04</span><span class="ansi36"></span> | <span class="ansi31"></span><span class="ansi1 ansi31">ERROR  </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">90</span><span class="ansi34"></span> - 响应文本: &lt;html&gt;
-&lt;head&gt;&lt;title&gt;504 Gateway Time-out&lt;/title&gt;&lt;/head&gt;
-&lt;body&gt;
-&lt;center&gt;&lt;h1&gt;504 Gateway Time-out&lt;/h1&gt;&lt;/center&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-
-
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:42:04</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">93</span><span class="ansi34"></span> - 状态码: 504
-
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:42:04</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">119</span><span class="ansi34"></span> - 响应结果: {&#x27;status_code&#x27;: 504}
-<br/> ----------------------------Captured stdout teardown---------------------------- <br/>
-<span class="ansi36"></span><span class="ansi1 ansi36">2023-07-11 12:42:04</span><span class="ansi36"></span> | <span class="ansi31"></span><span class="ansi1 ansi31">ERROR  </span> | <span class="ansi33"></span><span class="ansi1 ansi33">pytest_runtest_makereport</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">206</span><span class="ansi34"></span> - 执行结束: FAILED
-<br/></div></td></tr></tbody>
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
           <td><span style="color: saddlebrown">data/demo/test_demo.yaml::test_demo_01[演示用例]</span></td>
-          <td><span style="color: black">1.39</span></td>
-          <td>
-            <p class="col-time">07-11 12:42:24</p></td>
+          <td><span style="color: black">0.54</span></td>
+          <td class="col-time">2024-01-02 15:28:37</td>
           <td>
             <p style="font-weight: 400; color: black; margin: 0">演示用例</p></td>
           <td><span style="color: black">goodman</span></td>
@@ -1637,65 +1573,189 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
           <td><span style="color: black">2022.10.26</span></td></tr>
         <tr class="collapsed">
           <td class="extra" colspan="8">
-            <div class="empty log">we will not record log for passed case.</div></td></tr></tbody>
+            <div class="log">[gw0] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python<br/>[gw0] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python[gw0] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python[gw0] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python<br/> -----------------------------Captured stdout setup------------------------------ <br/>
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:37</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">request_of</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">374</span><span class="ansi34"></span> - 执行用例: test_demo_01 &lt;None&gt;
+<br/> ------------------------------Captured stdout call------------------------------ <br/>
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:37</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">call</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">308</span><span class="ansi34"></span> -  Step 1: 无当前步骤说明信息，建议补充
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:37</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">136</span><span class="ansi34"></span> - 请求地址: http://httpbin.org:80/post
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:37</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">137</span><span class="ansi34"></span> - 请求方式: POST
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:37</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">138</span><span class="ansi34"></span> - 请求头: {&#x27;Auth&#x27;: &#x27;Copyright reserved, please purchase&#x27;, &#x27;Content-Type&#x27;: &#x27;application/json&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:37</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">139</span><span class="ansi34"></span> - 查询参数: None
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:37</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">140</span><span class="ansi34"></span> - 表单参数: {&#x27;key&#x27;: &#x27;豫章故郡，洪都新府&#x27;, &#x27;val&#x27;: &#x27;萍水相逢，尽是他乡之客&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:37</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">157</span><span class="ansi34"></span> - 状态码: 200
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:37</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">183</span><span class="ansi34"></span> - 响应结果: {&#x27;args&#x27;: {}, &#x27;data&#x27;: &#x27;{&quot;key&quot;: &quot;\\u8c6b\\u7ae0\\u6545\\u90e1\\uff0c\\u6d2a\\u90fd\\u65b0\\u5e9c&quot;, &quot;val&quot;: &quot;\\u840d\\u6c34\\u76f8\\u9022\\uff0c\\u5c3d\\u662f\\u4ed6\\u4e61\\u4e4b\\u5ba2&quot;}&#x27;, &#x27;files&#x27;: {}, &#x27;form&#x27;: {}, &#x27;headers&#x27;: {&#x27;Accept&#x27;: &#x27;*/*&#x27;, &#x27;Accept-Encoding&#x27;: &#x27;gzip, deflate&#x27;, &#x27;Auth&#x27;: &#x27;Copyright reserved, please purchase&#x27;, &#x27;Content-Length&#x27;: &#x27;142&#x27;, &#x27;Content-Type&#x27;: &#x27;application/json&#x27;, &#x27;Host&#x27;: &#x27;httpbin.org&#x27;, &#x27;User-Agent&#x27;: &#x27;python-requests/2.28.1&#x27;, &#x27;X-Amzn-Trace-Id&#x27;: &#x27;Root=1-6593bb25-1e28a89d3c09cc657f7f033f&#x27;}, &#x27;json&#x27;: {&#x27;key&#x27;: &#x27;豫章故郡，洪都新府&#x27;, &#x27;val&#x27;: &#x27;萍水相逢，尽是他乡之客&#x27;}, &#x27;origin&#x27;: &#x27;182.148.14.74&#x27;, &#x27;url&#x27;: &#x27;http://httpbin.org/post&#x27;, &#x27;status_code&#x27;: 200}
+<br/> ----------------------------Captured stdout teardown---------------------------- <br/>
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:37</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">pytest_runtest_makereport</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">218</span><span class="ansi34"></span> - 执行结束: PASSED
+<br/></div></td></tr></tbody>
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
           <td><span style="color: saddlebrown">data/demo/test_demo.yaml::test_demo_02[参数化演示用例 - 0]</span></td>
-          <td><span style="color: black">8.05</span></td>
-          <td>
-            <p class="col-time">07-11 12:42:24</p></td>
+          <td><span style="color: black">4.04</span></td>
+          <td class="col-time">2024-01-02 15:28:37</td>
           <td>
             <p style="font-weight: 400; color: black; margin: 0">参数化演示用例</p>
-            <div><span style="color: green">| text : </span><span style="color: peru">参数化随机文本: 不能东西</span></div>
+            <div><span style="color: green">| text : </span><span style="color: peru">参数化随机文本: 等级游戏</span></div>
             <div><span style="color: green">| answer : </span><span style="color: peru">其疾如风</span></div></td>
           <td><span style="color: black">goodman</span></td>
           <td><span style="color: black">P1</span></td>
           <td><span style="color: black">2022.10.26</span></td></tr>
         <tr class="collapsed">
           <td class="extra" colspan="8">
-            <div class="empty log">we will not record log for passed case.</div></td></tr></tbody>
+            <div class="log">[gw1] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python<br/>[gw1] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python[gw1] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python[gw1] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python<br/> -----------------------------Captured stdout setup------------------------------ <br/>
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:37</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">request_of</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">374</span><span class="ansi34"></span> - 执行用例: test_demo_02 &lt;None&gt;
+<br/> ------------------------------Captured stdout call------------------------------ <br/>
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">call</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">308</span><span class="ansi34"></span> -  Step 1: 无当前步骤说明信息，建议补充
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">136</span><span class="ansi34"></span> - 请求地址: http://httpbin.org:80/post
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">137</span><span class="ansi34"></span> - 请求方式: POST
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">138</span><span class="ansi34"></span> - 请求头: {&#x27;Content-Type&#x27;: &#x27;application/json&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">139</span><span class="ansi34"></span> - 查询参数: None
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">140</span><span class="ansi34"></span> - 表单参数: {&#x27;key&#x27;: &#x27;第一次执行: 参数化随机文本: 等级游戏&#x27;, &#x27;val&#x27;: &#x27;其疾如风&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">157</span><span class="ansi34"></span> - 状态码: 200
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">183</span><span class="ansi34"></span> - 响应结果: {&#x27;args&#x27;: {}, &#x27;data&#x27;: &#x27;{&quot;key&quot;: &quot;\\u7b2c\\u4e00\\u6b21\\u6267\\u884c: \\u53c2\\u6570\\u5316\\u968f\\u673a\\u6587\\u672c: \\u7b49\\u7ea7\\u6e38\\u620f&quot;, &quot;val&quot;: &quot;\\u5176\\u75be\\u5982\\u98ce&quot;}&#x27;, &#x27;files&#x27;: {}, &#x27;form&#x27;: {}, &#x27;headers&#x27;: {&#x27;Accept&#x27;: &#x27;*/*&#x27;, &#x27;Accept-Encoding&#x27;: &#x27;gzip, deflate&#x27;, &#x27;Content-Length&#x27;: &#x27;146&#x27;, &#x27;Content-Type&#x27;: &#x27;application/json&#x27;, &#x27;Host&#x27;: &#x27;httpbin.org&#x27;, &#x27;User-Agent&#x27;: &#x27;python-requests/2.28.1&#x27;, &#x27;X-Amzn-Trace-Id&#x27;: &#x27;Root=1-6593bb28-7c449cc72f84dffd1ffc7de4&#x27;}, &#x27;json&#x27;: {&#x27;key&#x27;: &#x27;第一次执行: 参数化随机文本: 等级游戏&#x27;, &#x27;val&#x27;: &#x27;其疾如风&#x27;}, &#x27;origin&#x27;: &#x27;182.148.14.74&#x27;, &#x27;url&#x27;: &#x27;http://httpbin.org/post&#x27;, &#x27;status_code&#x27;: 200}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">call</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">308</span><span class="ansi34"></span> -  Step 2: 无当前步骤说明信息，建议补充
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">136</span><span class="ansi34"></span> - 请求地址: http://httpbin.org:80/post
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">137</span><span class="ansi34"></span> - 请求方式: POST
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">138</span><span class="ansi34"></span> - 请求头: {&#x27;Content-Type&#x27;: &#x27;application/json&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">139</span><span class="ansi34"></span> - 查询参数: None
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">140</span><span class="ansi34"></span> - 表单参数: {&#x27;key&#x27;: &#x27;第二次执行: 第一次执行: 参数化随机文本: 等级游戏&#x27;, &#x27;val&#x27;: &#x27;钟离昧&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">157</span><span class="ansi34"></span> - 状态码: 200
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">183</span><span class="ansi34"></span> - 响应结果: {&#x27;args&#x27;: {}, &#x27;data&#x27;: &#x27;{&quot;key&quot;: &quot;\\u7b2c\\u4e8c\\u6b21\\u6267\\u884c: \\u7b2c\\u4e00\\u6b21\\u6267\\u884c: \\u53c2\\u6570\\u5316\\u968f\\u673a\\u6587\\u672c: \\u7b49\\u7ea7\\u6e38\\u620f&quot;, &quot;val&quot;: &quot;\\u949f\\u79bb\\u6627&quot;}&#x27;, &#x27;files&#x27;: {}, &#x27;form&#x27;: {}, &#x27;headers&#x27;: {&#x27;Accept&#x27;: &#x27;*/*&#x27;, &#x27;Accept-Encoding&#x27;: &#x27;gzip, deflate&#x27;, &#x27;Content-Length&#x27;: &#x27;172&#x27;, &#x27;Content-Type&#x27;: &#x27;application/json&#x27;, &#x27;Host&#x27;: &#x27;httpbin.org&#x27;, &#x27;User-Agent&#x27;: &#x27;python-requests/2.28.1&#x27;, &#x27;X-Amzn-Trace-Id&#x27;: &#x27;Root=1-6593bb29-67e5b637552603d643f495f2&#x27;}, &#x27;json&#x27;: {&#x27;key&#x27;: &#x27;第二次执行: 第一次执行: 参数化随机文本: 等级游戏&#x27;, &#x27;val&#x27;: &#x27;钟离昧&#x27;}, &#x27;origin&#x27;: &#x27;182.148.14.74&#x27;, &#x27;url&#x27;: &#x27;http://httpbin.org/post&#x27;, &#x27;status_code&#x27;: 200}
+<br/> ----------------------------Captured stdout teardown---------------------------- <br/>
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">pytest_runtest_makereport</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">218</span><span class="ansi34"></span> - 执行结束: PASSED
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td><span style="color: saddlebrown">data/demo/test_demo.yaml::test_demo_02[参数化演示用例 - 1]</span></td>
+          <td><span style="color: black">4.30</span></td>
+          <td class="col-time">2024-01-02 15:28:37</td>
+          <td>
+            <p style="font-weight: 400; color: black; margin: 0">参数化演示用例</p>
+            <div><span style="color: green">| text : </span><span style="color: peru">参数化随机文本: 能力价格</span></div>
+            <div><span style="color: green">| answer : </span><span style="color: peru">其徐如林</span></div></td>
+          <td><span style="color: black">goodman</span></td>
+          <td><span style="color: black">P1</span></td>
+          <td><span style="color: black">2022.10.26</span></td></tr>
+        <tr class="collapsed">
+          <td class="extra" colspan="8">
+            <div class="log">[gw2] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python<br/>[gw2] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python[gw2] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python[gw2] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python<br/> -----------------------------Captured stdout setup------------------------------ <br/>
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:37</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">request_of</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">374</span><span class="ansi34"></span> - 执行用例: test_demo_02 &lt;None&gt;
+<br/> ------------------------------Captured stdout call------------------------------ <br/>
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">call</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">308</span><span class="ansi34"></span> -  Step 1: 无当前步骤说明信息，建议补充
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">136</span><span class="ansi34"></span> - 请求地址: http://httpbin.org:80/post
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">137</span><span class="ansi34"></span> - 请求方式: POST
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">138</span><span class="ansi34"></span> - 请求头: {&#x27;Content-Type&#x27;: &#x27;application/json&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">139</span><span class="ansi34"></span> - 查询参数: None
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">140</span><span class="ansi34"></span> - 表单参数: {&#x27;key&#x27;: &#x27;第一次执行: 参数化随机文本: 能力价格&#x27;, &#x27;val&#x27;: &#x27;其徐如林&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">157</span><span class="ansi34"></span> - 状态码: 200
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">183</span><span class="ansi34"></span> - 响应结果: {&#x27;args&#x27;: {}, &#x27;data&#x27;: &#x27;{&quot;key&quot;: &quot;\\u7b2c\\u4e00\\u6b21\\u6267\\u884c: \\u53c2\\u6570\\u5316\\u968f\\u673a\\u6587\\u672c: \\u80fd\\u529b\\u4ef7\\u683c&quot;, &quot;val&quot;: &quot;\\u5176\\u5f90\\u5982\\u6797&quot;}&#x27;, &#x27;files&#x27;: {}, &#x27;form&#x27;: {}, &#x27;headers&#x27;: {&#x27;Accept&#x27;: &#x27;*/*&#x27;, &#x27;Accept-Encoding&#x27;: &#x27;gzip, deflate&#x27;, &#x27;Content-Length&#x27;: &#x27;146&#x27;, &#x27;Content-Type&#x27;: &#x27;application/json&#x27;, &#x27;Host&#x27;: &#x27;httpbin.org&#x27;, &#x27;User-Agent&#x27;: &#x27;python-requests/2.28.1&#x27;, &#x27;X-Amzn-Trace-Id&#x27;: &#x27;Root=1-6593bb28-3d96970f2944c0d31ca53239&#x27;}, &#x27;json&#x27;: {&#x27;key&#x27;: &#x27;第一次执行: 参数化随机文本: 能力价格&#x27;, &#x27;val&#x27;: &#x27;其徐如林&#x27;}, &#x27;origin&#x27;: &#x27;182.148.14.74&#x27;, &#x27;url&#x27;: &#x27;http://httpbin.org/post&#x27;, &#x27;status_code&#x27;: 200}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">call</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">308</span><span class="ansi34"></span> -  Step 2: 无当前步骤说明信息，建议补充
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">136</span><span class="ansi34"></span> - 请求地址: http://httpbin.org:80/post
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">137</span><span class="ansi34"></span> - 请求方式: POST
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">138</span><span class="ansi34"></span> - 请求头: {&#x27;Content-Type&#x27;: &#x27;application/json&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">139</span><span class="ansi34"></span> - 查询参数: None
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">140</span><span class="ansi34"></span> - 表单参数: {&#x27;key&#x27;: &#x27;第二次执行: 第一次执行: 参数化随机文本: 能力价格&#x27;, &#x27;val&#x27;: &#x27;季布&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">157</span><span class="ansi34"></span> - 状态码: 200
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">183</span><span class="ansi34"></span> - 响应结果: {&#x27;args&#x27;: {}, &#x27;data&#x27;: &#x27;{&quot;key&quot;: &quot;\\u7b2c\\u4e8c\\u6b21\\u6267\\u884c: \\u7b2c\\u4e00\\u6b21\\u6267\\u884c: \\u53c2\\u6570\\u5316\\u968f\\u673a\\u6587\\u672c: \\u80fd\\u529b\\u4ef7\\u683c&quot;, &quot;val&quot;: &quot;\\u5b63\\u5e03&quot;}&#x27;, &#x27;files&#x27;: {}, &#x27;form&#x27;: {}, &#x27;headers&#x27;: {&#x27;Accept&#x27;: &#x27;*/*&#x27;, &#x27;Accept-Encoding&#x27;: &#x27;gzip, deflate&#x27;, &#x27;Content-Length&#x27;: &#x27;166&#x27;, &#x27;Content-Type&#x27;: &#x27;application/json&#x27;, &#x27;Host&#x27;: &#x27;httpbin.org&#x27;, &#x27;User-Agent&#x27;: &#x27;python-requests/2.28.1&#x27;, &#x27;X-Amzn-Trace-Id&#x27;: &#x27;Root=1-6593bb29-0a2029c915db831403c25a76&#x27;}, &#x27;json&#x27;: {&#x27;key&#x27;: &#x27;第二次执行: 第一次执行: 参数化随机文本: 能力价格&#x27;, &#x27;val&#x27;: &#x27;季布&#x27;}, &#x27;origin&#x27;: &#x27;182.148.14.74&#x27;, &#x27;url&#x27;: &#x27;http://httpbin.org/post&#x27;, &#x27;status_code&#x27;: 200}
+<br/> ----------------------------Captured stdout teardown---------------------------- <br/>
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">pytest_runtest_makereport</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">218</span><span class="ansi34"></span> - 执行结束: PASSED
+<br/></div></td></tr></tbody>
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
           <td><span style="color: saddlebrown">data/demo/test_demo.yaml::test_demo_02[参数化演示用例 - 2]</span></td>
-          <td><span style="color: black">6.14</span></td>
-          <td>
-            <p class="col-time">07-11 12:42:24</p></td>
+          <td><span style="color: black">4.35</span></td>
+          <td class="col-time">2024-01-02 15:28:37</td>
           <td>
             <p style="font-weight: 400; color: black; margin: 0">参数化演示用例</p>
-            <div><span style="color: green">| text : </span><span style="color: peru">参数化随机文本: 就是其中</span></div>
+            <div><span style="color: green">| text : </span><span style="color: peru">参数化随机文本: 知道以后</span></div>
             <div><span style="color: green">| answer : </span><span style="color: peru">侵掠如火</span></div></td>
           <td><span style="color: black">goodman</span></td>
           <td><span style="color: black">P1</span></td>
           <td><span style="color: black">2022.10.26</span></td></tr>
         <tr class="collapsed">
           <td class="extra" colspan="8">
-            <div class="empty log">we will not record log for passed case.</div></td></tr></tbody>
-      <tbody class="passed results-table-row">
-        <tr>
-          <td class="col-result">Passed</td>
-          <td><span style="color: saddlebrown">data/demo/test_demo.yaml::test_demo_02[参数化演示用例 - 3]</span></td>
-          <td><span style="color: black">5.55</span></td>
-          <td>
-            <p class="col-time">07-11 12:42:24</p></td>
-          <td>
-            <p style="font-weight: 400; color: black; margin: 0">参数化演示用例</p>
-            <div><span style="color: green">| text : </span><span style="color: peru">参数化随机文本: 其中没有</span></div>
-            <div><span style="color: green">| answer : </span><span style="color: peru">不动如山</span></div></td>
-          <td><span style="color: black">goodman</span></td>
-          <td><span style="color: black">P1</span></td>
-          <td><span style="color: black">2022.10.26</span></td></tr>
-        <tr class="collapsed">
-          <td class="extra" colspan="8">
-            <div class="empty log">we will not record log for passed case.</div></td></tr></tbody>
+            <div class="log">[gw3] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python<br/>[gw3] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python[gw3] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python[gw3] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python<br/> -----------------------------Captured stdout setup------------------------------ <br/>
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:37</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">request_of</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">374</span><span class="ansi34"></span> - 执行用例: test_demo_02 &lt;None&gt;
+<br/> ------------------------------Captured stdout call------------------------------ <br/>
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">call</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">308</span><span class="ansi34"></span> -  Step 1: 无当前步骤说明信息，建议补充
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">136</span><span class="ansi34"></span> - 请求地址: http://httpbin.org:80/post
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">137</span><span class="ansi34"></span> - 请求方式: POST
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">138</span><span class="ansi34"></span> - 请求头: {&#x27;Content-Type&#x27;: &#x27;application/json&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">139</span><span class="ansi34"></span> - 查询参数: None
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">140</span><span class="ansi34"></span> - 表单参数: {&#x27;key&#x27;: &#x27;第一次执行: 参数化随机文本: 知道以后&#x27;, &#x27;val&#x27;: &#x27;侵掠如火&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">157</span><span class="ansi34"></span> - 状态码: 200
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">183</span><span class="ansi34"></span> - 响应结果: {&#x27;args&#x27;: {}, &#x27;data&#x27;: &#x27;{&quot;key&quot;: &quot;\\u7b2c\\u4e00\\u6b21\\u6267\\u884c: \\u53c2\\u6570\\u5316\\u968f\\u673a\\u6587\\u672c: \\u77e5\\u9053\\u4ee5\\u540e&quot;, &quot;val&quot;: &quot;\\u4fb5\\u63a0\\u5982\\u706b&quot;}&#x27;, &#x27;files&#x27;: {}, &#x27;form&#x27;: {}, &#x27;headers&#x27;: {&#x27;Accept&#x27;: &#x27;*/*&#x27;, &#x27;Accept-Encoding&#x27;: &#x27;gzip, deflate&#x27;, &#x27;Content-Length&#x27;: &#x27;146&#x27;, &#x27;Content-Type&#x27;: &#x27;application/json&#x27;, &#x27;Host&#x27;: &#x27;httpbin.org&#x27;, &#x27;User-Agent&#x27;: &#x27;python-requests/2.28.1&#x27;, &#x27;X-Amzn-Trace-Id&#x27;: &#x27;Root=1-6593bb28-3c94c1b04dfedec27f603fa2&#x27;}, &#x27;json&#x27;: {&#x27;key&#x27;: &#x27;第一次执行: 参数化随机文本: 知道以后&#x27;, &#x27;val&#x27;: &#x27;侵掠如火&#x27;}, &#x27;origin&#x27;: &#x27;182.148.14.74&#x27;, &#x27;url&#x27;: &#x27;http://httpbin.org/post&#x27;, &#x27;status_code&#x27;: 200}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">call</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">308</span><span class="ansi34"></span> -  Step 2: 无当前步骤说明信息，建议补充
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">136</span><span class="ansi34"></span> - 请求地址: http://httpbin.org:80/post
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">137</span><span class="ansi34"></span> - 请求方式: POST
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">138</span><span class="ansi34"></span> - 请求头: {&#x27;Content-Type&#x27;: &#x27;application/json&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">139</span><span class="ansi34"></span> - 查询参数: None
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">140</span><span class="ansi34"></span> - 表单参数: {&#x27;key&#x27;: &#x27;第二次执行: 第一次执行: 参数化随机文本: 知道以后&#x27;, &#x27;val&#x27;: &#x27;龙且&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">157</span><span class="ansi34"></span> - 状态码: 200
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">183</span><span class="ansi34"></span> - 响应结果: {&#x27;args&#x27;: {}, &#x27;data&#x27;: &#x27;{&quot;key&quot;: &quot;\\u7b2c\\u4e8c\\u6b21\\u6267\\u884c: \\u7b2c\\u4e00\\u6b21\\u6267\\u884c: \\u53c2\\u6570\\u5316\\u968f\\u673a\\u6587\\u672c: \\u77e5\\u9053\\u4ee5\\u540e&quot;, &quot;val&quot;: &quot;\\u9f99\\u4e14&quot;}&#x27;, &#x27;files&#x27;: {}, &#x27;form&#x27;: {}, &#x27;headers&#x27;: {&#x27;Accept&#x27;: &#x27;*/*&#x27;, &#x27;Accept-Encoding&#x27;: &#x27;gzip, deflate&#x27;, &#x27;Content-Length&#x27;: &#x27;166&#x27;, &#x27;Content-Type&#x27;: &#x27;application/json&#x27;, &#x27;Host&#x27;: &#x27;httpbin.org&#x27;, &#x27;User-Agent&#x27;: &#x27;python-requests/2.28.1&#x27;, &#x27;X-Amzn-Trace-Id&#x27;: &#x27;Root=1-6593bb29-650c888f6b57ff0f7ff41a2c&#x27;}, &#x27;json&#x27;: {&#x27;key&#x27;: &#x27;第二次执行: 第一次执行: 参数化随机文本: 知道以后&#x27;, &#x27;val&#x27;: &#x27;龙且&#x27;}, &#x27;origin&#x27;: &#x27;182.148.14.74&#x27;, &#x27;url&#x27;: &#x27;http://httpbin.org/post&#x27;, &#x27;status_code&#x27;: 200}
+<br/> ----------------------------Captured stdout teardown---------------------------- <br/>
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">pytest_runtest_makereport</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">218</span><span class="ansi34"></span> - 执行结束: PASSED
+<br/></div></td></tr></tbody>
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
           <td><span style="color: saddlebrown">data/demo/test_demo.yaml::test_demo_03[又一个演示用例]</span></td>
-          <td><span style="color: black">8.08</span></td>
-          <td>
-            <p class="col-time">07-11 12:42:24</p></td>
+          <td><span style="color: black">1.13</span></td>
+          <td class="col-time">2024-01-02 15:28:41</td>
           <td>
             <p style="font-weight: 400; color: black; margin: 0">又一个演示用例</p></td>
           <td><span style="color: black">goodman</span></td>
@@ -1703,4 +1763,92 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
           <td><span style="color: black">2022.10.26</span></td></tr>
         <tr class="collapsed">
           <td class="extra" colspan="8">
-            <div class="empty log">we will not record log for passed case.</div></td></tr></tbody></table></body></html>
+            <div class="log">[gw1] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python<br/>[gw1] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python[gw1] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python[gw1] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python<br/> -----------------------------Captured stdout setup------------------------------ <br/>
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">request_of</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">374</span><span class="ansi34"></span> - 执行用例: test_demo_03 &lt;None&gt;
+<br/> ------------------------------Captured stdout call------------------------------ <br/>
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">call</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">308</span><span class="ansi34"></span> -  Step 1: 无当前步骤说明信息，建议补充
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">136</span><span class="ansi34"></span> - 请求地址: http://httpbin.org:80/post
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">137</span><span class="ansi34"></span> - 请求方式: POST
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">138</span><span class="ansi34"></span> - 请求头: {&#x27;Auth&#x27;: &#x27;Copyright reserved, please purchase&#x27;, &#x27;Content-Type&#x27;: &#x27;application/json&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">139</span><span class="ansi34"></span> - 查询参数: None
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">140</span><span class="ansi34"></span> - 表单参数: {&#x27;key&#x27;: &#x27;score&#x27;, &#x27;val&#x27;: [99, 100, 98, 89]}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">157</span><span class="ansi34"></span> - 状态码: 200
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">183</span><span class="ansi34"></span> - 响应结果: {&#x27;args&#x27;: {}, &#x27;data&#x27;: &#x27;{&quot;key&quot;: &quot;score&quot;, &quot;val&quot;: [99, 100, 98, 89]}&#x27;, &#x27;files&#x27;: {}, &#x27;form&#x27;: {}, &#x27;headers&#x27;: {&#x27;Accept&#x27;: &#x27;*/*&#x27;, &#x27;Accept-Encoding&#x27;: &#x27;gzip, deflate&#x27;, &#x27;Auth&#x27;: &#x27;Copyright reserved, please purchase&#x27;, &#x27;Content-Length&#x27;: &#x27;42&#x27;, &#x27;Content-Type&#x27;: &#x27;application/json&#x27;, &#x27;Host&#x27;: &#x27;httpbin.org&#x27;, &#x27;User-Agent&#x27;: &#x27;python-requests/2.28.1&#x27;, &#x27;X-Amzn-Trace-Id&#x27;: &#x27;Root=1-6593bb29-7f077a725ddbcbb04cc3abaf&#x27;}, &#x27;json&#x27;: {&#x27;key&#x27;: &#x27;score&#x27;, &#x27;val&#x27;: [99, 100, 98, 89]}, &#x27;origin&#x27;: &#x27;182.148.14.74&#x27;, &#x27;url&#x27;: &#x27;http://httpbin.org/post&#x27;, &#x27;status_code&#x27;: 200}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">call</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">308</span><span class="ansi34"></span> -  Step 2: 无当前步骤说明信息，建议补充
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">136</span><span class="ansi34"></span> - 请求地址: http://httpbin.org:80/post
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">137</span><span class="ansi34"></span> - 请求方式: POST
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">138</span><span class="ansi34"></span> - 请求头: {&#x27;Auth&#x27;: &#x27;Copyright reserved, please purchase&#x27;, &#x27;Content-Type&#x27;: &#x27;application/json&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">139</span><span class="ansi34"></span> - 查询参数: None
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">140</span><span class="ansi34"></span> - 表单参数: {&#x27;score&#x27;: &#x27;score&#x27;, &#x27;val&#x27;: [99, 100, 98, 89]}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:42</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">157</span><span class="ansi34"></span> - 状态码: 200
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:42</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">183</span><span class="ansi34"></span> - 响应结果: {&#x27;args&#x27;: {}, &#x27;data&#x27;: &#x27;{&quot;score&quot;: &quot;score&quot;, &quot;val&quot;: [99, 100, 98, 89]}&#x27;, &#x27;files&#x27;: {}, &#x27;form&#x27;: {}, &#x27;headers&#x27;: {&#x27;Accept&#x27;: &#x27;*/*&#x27;, &#x27;Accept-Encoding&#x27;: &#x27;gzip, deflate&#x27;, &#x27;Auth&#x27;: &#x27;Copyright reserved, please purchase&#x27;, &#x27;Content-Length&#x27;: &#x27;44&#x27;, &#x27;Content-Type&#x27;: &#x27;application/json&#x27;, &#x27;Host&#x27;: &#x27;httpbin.org&#x27;, &#x27;User-Agent&#x27;: &#x27;python-requests/2.28.1&#x27;, &#x27;X-Amzn-Trace-Id&#x27;: &#x27;Root=1-6593bb2a-4001340f1b0333607ae262b6&#x27;}, &#x27;json&#x27;: {&#x27;score&#x27;: &#x27;score&#x27;, &#x27;val&#x27;: [99, 100, 98, 89]}, &#x27;origin&#x27;: &#x27;182.148.14.74&#x27;, &#x27;url&#x27;: &#x27;http://httpbin.org/post&#x27;, &#x27;status_code&#x27;: 200}
+<br/> ----------------------------Captured stdout teardown---------------------------- <br/>
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:42</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">pytest_runtest_makereport</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">218</span><span class="ansi34"></span> - 执行结束: PASSED
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td><span style="color: saddlebrown">data/demo/test_demo.yaml::test_demo_02[参数化演示用例 - 3]</span></td>
+          <td><span style="color: black">4.72</span></td>
+          <td class="col-time">2024-01-02 15:28:37</td>
+          <td>
+            <p style="font-weight: 400; color: black; margin: 0">参数化演示用例</p>
+            <div><span style="color: green">| text : </span><span style="color: peru">参数化随机文本: 为什知道</span></div>
+            <div><span style="color: green">| answer : </span><span style="color: peru">不动如山</span></div></td>
+          <td><span style="color: black">goodman</span></td>
+          <td><span style="color: black">P1</span></td>
+          <td><span style="color: black">2022.10.26</span></td></tr>
+        <tr class="collapsed">
+          <td class="extra" colspan="8">
+            <div class="log">[gw0] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python<br/>[gw0] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python[gw0] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python[gw0] darwin -- Python 3.8.13 /Users/zhangjian1138/PycharmProjects/api-auto-test/venv/bin/python<br/> -----------------------------Captured stdout setup------------------------------ <br/>
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:37</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">request_of</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">374</span><span class="ansi34"></span> - 执行用例: test_demo_02 &lt;None&gt;
+<br/> ------------------------------Captured stdout call------------------------------ <br/>
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">call</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">308</span><span class="ansi34"></span> -  Step 1: 无当前步骤说明信息，建议补充
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">136</span><span class="ansi34"></span> - 请求地址: http://httpbin.org:80/post
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">137</span><span class="ansi34"></span> - 请求方式: POST
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">138</span><span class="ansi34"></span> - 请求头: {&#x27;Content-Type&#x27;: &#x27;application/json&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">139</span><span class="ansi34"></span> - 查询参数: None
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:40</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">140</span><span class="ansi34"></span> - 表单参数: {&#x27;key&#x27;: &#x27;第一次执行: 参数化随机文本: 为什知道&#x27;, &#x27;val&#x27;: &#x27;不动如山&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">157</span><span class="ansi34"></span> - 状态码: 200
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">183</span><span class="ansi34"></span> - 响应结果: {&#x27;args&#x27;: {}, &#x27;data&#x27;: &#x27;{&quot;key&quot;: &quot;\\u7b2c\\u4e00\\u6b21\\u6267\\u884c: \\u53c2\\u6570\\u5316\\u968f\\u673a\\u6587\\u672c: \\u4e3a\\u4ec0\\u77e5\\u9053&quot;, &quot;val&quot;: &quot;\\u4e0d\\u52a8\\u5982\\u5c71&quot;}&#x27;, &#x27;files&#x27;: {}, &#x27;form&#x27;: {}, &#x27;headers&#x27;: {&#x27;Accept&#x27;: &#x27;*/*&#x27;, &#x27;Accept-Encoding&#x27;: &#x27;gzip, deflate&#x27;, &#x27;Content-Length&#x27;: &#x27;146&#x27;, &#x27;Content-Type&#x27;: &#x27;application/json&#x27;, &#x27;Host&#x27;: &#x27;httpbin.org&#x27;, &#x27;User-Agent&#x27;: &#x27;python-requests/2.28.1&#x27;, &#x27;X-Amzn-Trace-Id&#x27;: &#x27;Root=1-6593bb29-1d4daed36e8c18572baa8eac&#x27;}, &#x27;json&#x27;: {&#x27;key&#x27;: &#x27;第一次执行: 参数化随机文本: 为什知道&#x27;, &#x27;val&#x27;: &#x27;不动如山&#x27;}, &#x27;origin&#x27;: &#x27;182.148.14.74&#x27;, &#x27;url&#x27;: &#x27;http://httpbin.org/post&#x27;, &#x27;status_code&#x27;: 200}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">call</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">308</span><span class="ansi34"></span> -  Step 2: 无当前步骤说明信息，建议补充
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">136</span><span class="ansi34"></span> - 请求地址: http://httpbin.org:80/post
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">137</span><span class="ansi34"></span> - 请求方式: POST
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">138</span><span class="ansi34"></span> - 请求头: {&#x27;Content-Type&#x27;: &#x27;application/json&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">139</span><span class="ansi34"></span> - 查询参数: None
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:41</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">140</span><span class="ansi34"></span> - 表单参数: {&#x27;key&#x27;: &#x27;第二次执行: 第一次执行: 参数化随机文本: 为什知道&#x27;, &#x27;val&#x27;: &#x27;英布&#x27;}
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:42</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">157</span><span class="ansi34"></span> - 状态码: 200
+
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:42</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">http_request</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">183</span><span class="ansi34"></span> - 响应结果: {&#x27;args&#x27;: {}, &#x27;data&#x27;: &#x27;{&quot;key&quot;: &quot;\\u7b2c\\u4e8c\\u6b21\\u6267\\u884c: \\u7b2c\\u4e00\\u6b21\\u6267\\u884c: \\u53c2\\u6570\\u5316\\u968f\\u673a\\u6587\\u672c: \\u4e3a\\u4ec0\\u77e5\\u9053&quot;, &quot;val&quot;: &quot;\\u82f1\\u5e03&quot;}&#x27;, &#x27;files&#x27;: {}, &#x27;form&#x27;: {}, &#x27;headers&#x27;: {&#x27;Accept&#x27;: &#x27;*/*&#x27;, &#x27;Accept-Encoding&#x27;: &#x27;gzip, deflate&#x27;, &#x27;Content-Length&#x27;: &#x27;166&#x27;, &#x27;Content-Type&#x27;: &#x27;application/json&#x27;, &#x27;Host&#x27;: &#x27;httpbin.org&#x27;, &#x27;User-Agent&#x27;: &#x27;python-requests/2.28.1&#x27;, &#x27;X-Amzn-Trace-Id&#x27;: &#x27;Root=1-6593bb29-4fe7a3b66e816fd2737ad5f7&#x27;}, &#x27;json&#x27;: {&#x27;key&#x27;: &#x27;第二次执行: 第一次执行: 参数化随机文本: 为什知道&#x27;, &#x27;val&#x27;: &#x27;英布&#x27;}, &#x27;origin&#x27;: &#x27;182.148.14.74&#x27;, &#x27;url&#x27;: &#x27;http://httpbin.org/post&#x27;, &#x27;status_code&#x27;: 200}
+<br/> ----------------------------Captured stdout teardown---------------------------- <br/>
+<span class="ansi36"></span><span class="ansi1 ansi36">2024-01-02 15:28:42</span><span class="ansi36"></span> | <span class="ansi1">INFO   </span> | <span class="ansi33"></span><span class="ansi1 ansi33">pytest_runtest_makereport</span><span class="ansi33"></span>:<span class="ansi34"></span><span class="ansi1 ansi34">218</span><span class="ansi34"></span> - 执行结束: PASSED
+<br/></div></td></tr></tbody></table></body></html>

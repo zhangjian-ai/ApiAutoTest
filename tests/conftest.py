@@ -18,7 +18,7 @@ from libs.framework.inner.mail import Mail
 from libs.framework.inner.render import Render
 from libs.framework.inner.loads import load_case, load_yaml
 from libs.framework.inner.runner import Executor, CapabilitySupport, Control
-from libs.framework.settings import TEMP_DIR, BASE_DIR, TEST_CASE, EMAIL_CONF,\
+from libs.settings import TEMP_DIR, BASE_DIR, TEST_CASE, EMAIL_CONF,\
     CMD_ARGS, DEBUG_FILE, REPORT_META_CONF, START_TIME, DB_CONF
 from libs.framework.open.entry import Entry
 from libs.framework.open.logger import log
@@ -79,12 +79,6 @@ def pytest_configure(config: Config):
     # 装载Entry
     Entry.assemble(config)
 
-    # 执行前置
-    Control.run_setup()
-
-    # 注入自定义夹具
-    Control.inject_fixture()
-
 
 def pytest_sessionstart(session: Session):
     """
@@ -94,6 +88,12 @@ def pytest_sessionstart(session: Session):
     # 删除测试临时目录
     if not os.path.exists(TEMP_DIR):
         os.makedirs(TEMP_DIR)
+
+    # 执行前置
+    Control.run_setup()
+
+    # 注入自定义夹具
+    Control.inject_fixture()
 
     # 测试报告增加元数据
     metadata = session.config._metadata
