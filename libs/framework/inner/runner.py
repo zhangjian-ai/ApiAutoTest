@@ -226,11 +226,16 @@ class CapabilitySupport(Entry):
 
             # 如果预期值是str、int、float那么就直接对比
             elif isinstance(value, (str, int, float)):
-                assert isinstance(response, dict) \
-                       and value == response.get(key), f'\n' \
-                                                       f'KEY: {key} \n' \
-                                                       f'预期结果: {json.dumps(expect, indent=2, ensure_ascii=False)}\n' \
-                                                       f'实际结果: {json.dumps(response, indent=2, ensure_ascii=False)}\n'
+                assert isinstance(response, dict), f"预期的数据类型是 DICT，而不是 {type(response)}"
+
+                if isinstance(value, str) and value.isdigit():
+                    value = float(value)
+                    response[key] = float(response.get(key, 0))
+
+                assert value == response.get(key), f'\n' \
+                                                   f'KEY: {key} \n' \
+                                                   f'预期结果: {json.dumps(expect, indent=2, ensure_ascii=False)}\n' \
+                                                   f'实际结果: {json.dumps(response, indent=2, ensure_ascii=False)}\n'
 
             # 如果预期值是list则便利预期列表中的item是否都在实际结果中能找到
             elif isinstance(value, (list, tuple)):
@@ -408,13 +413,83 @@ class Executor(Entry):
 
         # 按步骤依次调度
         for idx, step in enumerate(target_steps):
+            # 步骤延迟
+            delay = step.get("delay")
+            if delay:
+                time.sleep(delay)
+
             # 处理步骤模版参数，转换之后赋值给magic
             args = step.pop("step_args", {})
             self.magic.trans(args)
             self.magic.sp = args
 
-            # 处理其他模版参数
-            self.magic.trans(step)
-
             # 暂存当前接口调用结果到stages
-            self.magic.r.append(CapabilitySupport.call(step, idx + 1))
+            self.magic.r.append(self.invoke(step, idx + 1))
+
+    def invoke(self, step, order):
+        """
+        执行请求
+        """
+        # 预期结果在每次请求后再做渲染
+        expect = step.pop("response", {})
+
+        # 处理动态数据
+        self.magic.trans(step)
+
+        # 获取接口信息
+        api = self.im.get(step.get("api"))
+
+        # 请求类型
+        is_http = True
+
+        # http 数据拼接
+        if is_http:
+            # 测试数据补充到默认 api 数据中
+            for key, val in step.get("request").items():
+                if key in api:
+                    if key == "url":
+                        api["url"] += str(val)
+                    elif isinstance(api[key], dict):
+                        api[key].update(val)
+                    continue
+                api[key] = val
+        else:
+            pass
+
+        # 根据调度逻辑处理接口调用和验证
+        rule = {"timeout": 0, "interval": 3}
+        rule.update(step.get("rule", {}))
+        rule["interval"] = max(rule["interval"], 1)
+
+        # 处理请求参数
+        response = None
+        start = 0
+
+        # step 日志
+        log.info(f"Step {order}: {step.get('log', '无当前步骤说明信息，建议补充')}")
+
+        while start <= rule["timeout"]:
+            try:
+                # 请求接口
+                response = http_request(**api) if is_http else {}
+
+                # 实时渲染预期结果
+                current_expect = {"expect": deepcopy(expect)}
+                self.magic.trans(current_expect)
+
+                CapabilitySupport.verify_result(current_expect["expect"], response)
+
+                break
+            except Exception as e:
+                # 如果是最后一次接口调用就引发异常
+                if start > rule["timeout"] - rule["interval"]:
+                    raise e
+
+                start += rule["interval"]
+                time.sleep(rule["interval"])
+
+                # 重试日志
+                log.info(
+                    f"Step {order}: {step.get('log', '无当前步骤说明信息，建议补充')} [ retry_times: {start // rule['interval']} ] ")
+
+        return response or {}
