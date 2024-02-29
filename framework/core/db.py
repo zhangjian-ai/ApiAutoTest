@@ -2,7 +2,7 @@ import pymysql
 from dbutils.pooled_db import PooledDB
 from pymysql.cursors import DictCursor
 
-from libs.framework.open.logger import log
+from framework.open.logger import log
 
 
 class MysqlConnPool:

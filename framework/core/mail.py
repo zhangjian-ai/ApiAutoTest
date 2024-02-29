@@ -5,7 +5,7 @@ from email.utils import formataddr
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from libs.framework.open.logger import log
+from framework.open.logger import log
 
 
 class Mail:

@@ -1,7 +1,7 @@
 import re
 import pytest
 
-from libs.framework.open.entry import Entry
+from framework.open.entry import Entry
 
 
 class Render(Entry):
@@ -97,15 +97,32 @@ class Render(Entry):
                             data[key] = target
 
     @staticmethod
-    def render_string(string: str):
+    def render_settings(origin: dict, target: dict = None):
         """
-        按照框架规则替换命令行参数到字符串
-        规则：字符串中 {xxx} 部分将被替换，如果 xxx 是命令行参数的话
+        处理settings中变量的
         """
-        args = re.findall(r"\{(.+?)\}", string)
-        for arg in args:
-            new = Render.config.getoption(arg)
-            if new:
-                string = string.replace("{" + arg + "}", new)
+        if not target:
+            target = origin
 
-        return string
+        for key, val in origin.items():
+            if isinstance(val, dict):
+                Render.render_settings(val, target)
+
+            if isinstance(val, str):
+                args = re.findall(r"\{(.+?)\}", val)
+                for arg in args:
+                    if isinstance(arg, str) and arg.__contains__("."):
+                        keys = arg.strip().split(".")
+                        cur = None
+                        if keys[0] == "meta":
+                            cur = target
+                            for k in keys:
+                                cur = cur.get(k, {})
+
+                        if keys[0] == "args":
+                            cur = Render.config.getoption(keys[-1])
+
+                        if cur:
+                            val = val.replace("{" + arg + "}", cur)
+
+                origin[key] = val

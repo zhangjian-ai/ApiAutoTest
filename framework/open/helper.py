@@ -1,17 +1,17 @@
 import os
 import time
 import json
+import yaml
 import requests
 import traceback
 
 from urllib import parse
 from functools import wraps
-from google.protobuf import json_format
-from grpc._channel import _MultiThreadedRendezvous
-
-from libs.settings import TEMP_DIR
-from libs.framework.open.entry import Entry
-from libs.framework.open.logger import log
+# from google.protobuf import json_format
+# from grpc._channel import _MultiThreadedRendezvous
+from config import TEMP_DIR
+from framework.open.entry import Entry
+from framework.open.logger import log
 
 
 class DbUtils:
@@ -189,26 +189,26 @@ def http_request(method="POST", url=None, data=None, params=None, headers=None, 
         raise e
 
 
-def protobuf_to_dict(protobuf) -> dict:
-    """
-    pb转字典
-    :param protobuf: pb 对象
-    :return:
-    """
-    # 流式接口自动封装一层
-    if isinstance(protobuf, _MultiThreadedRendezvous):
-        res = {"stream": []}
-
-        while True:
-            try:
-                res["stream"].append(protobuf_to_dict(protobuf.next()))
-            except StopIteration:
-                break
-
-        return res
-
-    string = json_format.MessageToJson(protobuf,
-                                       including_default_value_fields=True,
-                                       preserving_proto_field_name=True)
-
-    return json.loads(string)
+# def protobuf_to_dict(protobuf) -> dict:
+#     """
+#     pb转字典
+#     :param protobuf: pb 对象
+#     :return:
+#     """
+#     # 流式接口自动封装一层
+#     if isinstance(protobuf, _MultiThreadedRendezvous):
+#         res = {"stream": []}
+#
+#         while True:
+#             try:
+#                 res["stream"].append(protobuf_to_dict(protobuf.next()))
+#             except StopIteration:
+#                 break
+#
+#         return res
+#
+#     string = json_format.MessageToJson(protobuf,
+#                                        including_default_value_fields=True,
+#                                        preserving_proto_field_name=True)
+#
+#     return json.loads(string)

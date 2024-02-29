@@ -15,10 +15,10 @@ from types import FunctionType
 
 from _pytest.fixtures import SubRequest
 
-from libs.framework.open.logger import log
-from libs.framework.inner.render import Render
-from libs.framework.open.entry import Setup, Teardown, Entry
-from libs.framework.open.helper import http_request, protobuf_to_dict
+from framework.core.render import Render
+from framework.open.entry import Setup, Entry, Teardown
+from framework.open.helper import http_request
+from framework.open.logger import log
 
 
 class Control(Entry):
@@ -376,7 +376,7 @@ class Executor(Entry):
         Executor._validator(func_name, deepcopy(data.get("spec", {})), config.getoption("branch"))
 
         # 用例开始执行
-        log.info(f"执行用例: {func_name} <{data.get('info', {}).get('description')}>")
+        log.info(f"执行用例: {func_name} <{data.get('meta', {}).get('desc')}>")
 
         return Executor(request)
 

@@ -5,9 +5,10 @@ import tkinter as tk
 from _tkinter import TclError
 from tkinter import ttk
 
-from libs.settings import API_FILE, BASE_DIR, CUSTOM_UTILS, TEST_CASE
-from libs.framework.inner.loads import load_interface, scan_custom, load_case
+from config import CONF_FILE, BASE_DIR, CUSTOM_LIBS, CASE_DIR
+from framework.core.loads import load_yaml, load_interface, scan_custom, load_case
 
+settings = load_yaml(CONF_FILE)["nightingale"]
 
 class Seeker:
     """
@@ -49,29 +50,29 @@ class Seeker:
 
     def get_api(self):
         if not self.apis:
-            for conf in API_FILE:
+            for conf in settings["meta"]["products"]:
                 self.apis[conf["product"]] = load_interface(os.path.join(BASE_DIR, conf["path"]))
 
         return self.apis
 
     def get_utils(self):
         if not self.utils:
-            users = scan_custom(CUSTOM_UTILS)
+            users = scan_custom(CUSTOM_LIBS)
             self.utils["user_utils"] = {}
             self.utils["fixtures"] = users[1]
 
             for name, unknown in users[0].items():
                 source_path = inspect.getsourcefile(unknown)
                 # 此处收集用户定义的类和方法
-                if source_path.startswith(os.path.join(BASE_DIR, CUSTOM_UTILS)):
+                if source_path.startswith(os.path.join(BASE_DIR, CUSTOM_LIBS)):
                     self.utils["user_utils"][name] = unknown
 
-            system = scan_custom(os.path.join("libs", "framework", "open"))
+            system = scan_custom(os.path.join("config", "framework", "open"))
             self.utils["system_utils"] = {}
             for name, unknown in system[0].items():
                 source_path = inspect.getsourcefile(unknown)
                 # 框架提供的
-                if source_path.startswith(os.path.join(BASE_DIR, "libs", "framework", "open")):
+                if source_path.startswith(os.path.join(BASE_DIR, "config", "framework", "open")):
                     self.utils["system_utils"][name] = unknown
 
         return self.utils
@@ -79,11 +80,11 @@ class Seeker:
     def get_cases(self):
         if not self.items:
             # 查询出主要目录
-            _, dirs, _ = os.walk(os.path.join(BASE_DIR, TEST_CASE)).__next__()
+            _, dirs, _ = os.walk(os.path.join(CASE_DIR)).__next__()
 
             for target in dirs:
                 if not target.startswith("_"):
-                    self.items[target] = load_case(os.path.join(BASE_DIR, TEST_CASE, target), "")
+                    self.items[target] = load_case(os.path.join(CASE_DIR, target), "")
 
         return self.items
 

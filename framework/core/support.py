@@ -4,8 +4,8 @@ import threading
 from copy import deepcopy
 from collections import defaultdict
 
-from libs.settings import API_FILE, BASE_DIR
-from libs.framework.inner.loads import load_interface
+from config import BASE_DIR
+from framework.core.loads import load_interface
 
 
 class InterfaceManager:
@@ -33,19 +33,18 @@ class InterfaceManager:
 
             return deepcopy(self.apis[item])
 
-    def __init__(self):
+    def __init__(self, products: dict):
         # 接口管理类同时管理多个产品的接口实例
         self.products = {}
 
         # 校验api配置
-        if not API_FILE:
+        if not products:
             raise RuntimeError(f"API_FILE 配置错误，请检查 settings 文件")
 
-        if API_FILE:
-            for conf in API_FILE:
-                self.products[conf["product"]] = \
-                    InterfaceManager.Interface(name=conf["product"],
-                                               apis=load_interface(os.path.join(BASE_DIR, conf["path"])))
+        for p in products:
+            self.products[p["name"]] = \
+                InterfaceManager.Interface(name=p["name"],
+                                           apis=load_interface(os.path.join(BASE_DIR, p["path"])))
 
     def get(self, item) -> dict or Interface:
         if item in ["products"]:

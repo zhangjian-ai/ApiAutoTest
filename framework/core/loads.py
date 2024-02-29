@@ -4,10 +4,9 @@ import yaml
 from inspect import isfunction, isclass
 from importlib.machinery import SourceFileLoader
 
-from google.protobuf.internal.python_message import GeneratedProtocolMessageType
-
-from libs.settings import BASE_DIR
-from libs.framework.open.logger import log
+# from google.protobuf.internal.python_message import GeneratedProtocolMessageType
+from config import BASE_DIR
+from framework.open.logger import log
 
 
 def load_yaml(path) -> dict:
@@ -173,7 +172,7 @@ def scan_custom(modules: str or list) -> tuple:
                         continue
                     utils[attr] = unknown
 
-                elif isinstance(unknown, GeneratedProtocolMessageType):
-                    utils[attr] = unknown
+                # elif isinstance(unknown, GeneratedProtocolMessageType):
+                #     utils[attr] = unknown
 
     return utils, fixtures, controllers

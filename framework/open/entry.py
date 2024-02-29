@@ -1,10 +1,10 @@
 from abc import abstractmethod
 from _pytest.config import Config
 
-from libs.settings import CUSTOM_UTILS
-from libs.framework.inner.db import MysqlConnPool
-from libs.framework.inner.loads import scan_custom
-from libs.framework.inner.support import InterfaceManager
+from config import CUSTOM_LIBS
+from framework.core.db import MysqlConnPool
+from framework.core.loads import scan_custom
+from framework.core.support import InterfaceManager
 
 
 class Entry:
@@ -19,14 +19,14 @@ class Entry:
     mysql_pool: MysqlConnPool = None
 
     @classmethod
-    def assemble(cls, config: Config):
+    def assemble(cls, config: Config, settings: dict):
         cls.config = config
 
         # 接口管理实例
-        cls.im = InterfaceManager()
+        cls.im = InterfaceManager(settings.get("meta").get("products"))
 
         # 收集所有的工具类及方法
-        cls.source, cls.fixtures, cls.controllers = scan_custom(CUSTOM_UTILS)
+        cls.source, cls.fixtures, cls.controllers = scan_custom(CUSTOM_LIBS)
 
         # mysql 连接池
         # cls.mysql_pool = MysqlConnPool(host=config.getoption("db_host"), port=config.getoption("db_port"),

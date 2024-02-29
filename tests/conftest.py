@@ -13,15 +13,18 @@ from _pytest.python import Metafunc
 from _pytest.runner import CallInfo
 from py._path.local import LocalPath
 
-from libs.framework.inner.report import *
-from libs.framework.inner.mail import Mail
-from libs.framework.inner.render import Render
-from libs.framework.inner.loads import load_case, load_yaml
-from libs.framework.inner.runner import Executor, CapabilitySupport, Control
-from libs.settings import TEMP_DIR, BASE_DIR, TEST_CASE, EMAIL_CONF,\
-    CMD_ARGS, DEBUG_FILE, REPORT_META_CONF, START_TIME, DB_CONF
-from libs.framework.open.entry import Entry
-from libs.framework.open.logger import log
+from config import CONF_FILE, TEMP_DIR, CASE_DIR
+from framework.core.report import *
+from framework.core.mail import Mail
+from framework.core.render import Render
+from framework.core.loads import load_case, load_yaml
+from framework.core.runner import Executor, CapabilitySupport, Control
+
+from framework.open.entry import Entry
+from framework.open.logger import log
+
+# 项目配置
+settings = load_yaml(CONF_FILE)["nightingale"]
 
 
 def pytest_addoption(parser: Parser):
@@ -29,43 +32,19 @@ def pytest_addoption(parser: Parser):
     命令行注册
     初始化时最先调用的Hook
     """
-    # 需要注册的命令行参数转为字典
-    args = {key: val for key, val in CMD_ARGS.items()}
 
-    # 加载调试配置
-    debug = load_yaml(DEBUG_FILE)
-
-    if debug:
-        default = debug.get("default", {})
-        env = debug.get("env")
-
-        if env:
-            env_conf = debug.get(env, {})
-            default.update(env_conf)
-
-        # 将调试信息覆盖添加到 args
-        args.update(default)
+    def add_option(p: Parser, args: dict):
+        for k, v in args.items():
+            if isinstance(v, dict):
+                add_option(p, v)
+            else:
+                p.addoption(f"--{k}", action="store", default=str(v))
 
     # 内置固定命令行
-    if "case" not in args:
-        parser.addoption("--case", action="store", default="")
+    parser.addoption("--case", action="store", default="")
 
-    if "branch" not in args:
-        parser.addoption("--branch", action="store", default="master")
-
-    # 注册命初始化令行
-    for key, value in args.items():
-        parser.addoption(f"--{key}", action="store", default=value)
-
-    # 注册邮箱配置参数
-    for key, value in EMAIL_CONF.items():
-        if key not in args:
-            parser.addoption(f"--{key}", action="store", default=value)
-
-    # 注册数据库配置
-    for key, value in DB_CONF.items():
-        if key not in args:
-            parser.addoption(f"--{key}", action="store", default=value)
+    # 注册通用命令行
+    add_option(parser, settings.get("args", {}))
 
 
 def pytest_configure(config: Config):
@@ -77,7 +56,7 @@ def pytest_configure(config: Config):
     log.info("测试进程启动")
 
     # 装载Entry
-    Entry.assemble(config)
+    Entry.assemble(config, settings)
 
 
 def pytest_sessionstart(session: Session):
@@ -85,9 +64,12 @@ def pytest_sessionstart(session: Session):
     创建Session对象后调用的Hook
     config对象配置为session的属性
     """
-    # 删除测试临时目录
+    # 创建测试临时目录
     if not os.path.exists(TEMP_DIR):
         os.makedirs(TEMP_DIR)
+
+    # 处理settings配置的引用
+    Render.render_settings(settings)
 
     # 执行前置
     Control.run_setup()
@@ -99,13 +81,15 @@ def pytest_sessionstart(session: Session):
     metadata = session.config._metadata
     metadata.clear()
 
-    for key, val in REPORT_META_CONF.items():
-        metadata[key] = Render.render_string(val)
+    for key, val in settings.get("report", {}).items():
+        if key == "测试时间":
+            metadata[key] = time.strftime('%Y-%m-%d %H:%M:%S')
+            continue
 
-    # 更新邮箱配置
-    for key in EMAIL_CONF.keys():
-        EMAIL_CONF[key] = Render.render_string(session.config.getoption(key))
-    EMAIL_CONF["start_time"] = START_TIME
+        metadata[key] = val
+
+    # 同步邮件时间信息
+    settings.get("args", {}).get("mail", {})["start_time"] = metadata["测试时间"]
 
 
 def pytest_pycollect_makemodule(path: LocalPath, parent: Collector):
@@ -116,7 +100,7 @@ def pytest_pycollect_makemodule(path: LocalPath, parent: Collector):
     if path.purebasename == "test_entrypoint":
 
         # 获取用例名称及其文件路径的映射关系
-        cases = load_case(target_dir=os.path.join(BASE_DIR, TEST_CASE),
+        cases = load_case(target_dir=os.path.join(CASE_DIR),
                           target=parent.config.getoption("case"))
 
         # 导入入口模块，加载用例
@@ -125,7 +109,8 @@ def pytest_pycollect_makemodule(path: LocalPath, parent: Collector):
 
         # 构建用例
         for key, val in cases.items():
-            setattr(module, key, CapabilitySupport.build_func(key, extend_fixtures=val.get("spec", {}).get("fixtures", [])))
+            setattr(module, key,
+                    CapabilitySupport.build_func(key, extend_fixtures=val.get("spec", {}).get("fixtures", [])))
 
         # 传递测试数据
         parent.config.cases = cases
@@ -224,7 +209,8 @@ def pytest_sessionfinish(session: Session, exitstatus: int):
         # 测试报告也仅在主节点发送一次
         if hasattr(session.config, "_html"):
             with open(session.config._html.logfile, "r") as f:
-                Mail.send_mail(config=EMAIL_CONF, content=f.read(), annex_files=[session.config._html.logfile])
+                Mail.send_mail(config=settings.get("args", {}).get("mail", {}), content=f.read(),
+                               annex_files=[session.config._html.logfile])
 
         # 分布式测试时，在主节点执行数据清理逻辑
         log.info("执行测试后处理")

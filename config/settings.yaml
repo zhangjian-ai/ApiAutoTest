@@ -1,0 +1,42 @@
+####################################
+############# 项目配置 ##############
+####################################
+
+# 各配置之间，可用 {参数名} 形式使用 meta、args 中的参数
+# 需要注意的是，线上运行时命令行参数将被实际的入参覆盖，尽量保证被引用的变量，在参数传递时是一个常量值
+nightingale:
+  meta:
+    name: "接口自动化测试"
+    products:
+      - name: httpbin
+        path: config/api/httpbin
+        proto:  # 保留字段
+
+  args:
+    common:
+      branch: master
+      host: "http://httpbin.org"
+      port: "80"
+      username:
+      password:
+    mysql:
+      db_host:
+      db_port:
+      db_user:
+      db_pwd:
+    mail:
+      email_sender:
+      email_receiver:
+      from_name:
+      subject: "测试报告-{args.common.branch}"
+      email_password:
+      smtp_server: "smtp.exmail.qq.com"
+      ssl_port: "465"
+
+  report:
+    项目名称: "{meta.name}"
+    测试分支: "{args.common.branch}"
+    测试地址: "{args.common.host}"
+    测试时间:
+
+

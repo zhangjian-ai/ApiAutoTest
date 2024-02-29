@@ -33,7 +33,7 @@ test_demo_01:
 test_demo_02:
   spec:
     marks: [ "smoke" ]
-    fixtures: [ "delay3s" ]
+    fixtures: [ "print_demo" ]
   meta:
     desc: "参数化演示用例"
     author: "goodman"

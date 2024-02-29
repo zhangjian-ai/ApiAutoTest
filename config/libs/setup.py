@@ -1,4 +1,4 @@
-from libs.framework.open.entry import Setup
+from framework.open.entry import Setup
 
 
 class MySetup(Setup):
