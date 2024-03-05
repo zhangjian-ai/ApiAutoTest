@@ -1,4 +1,6 @@
 import os
+import shutil
+
 import xdist
 
 from typing import List
@@ -218,7 +220,8 @@ def pytest_sessionfinish(session: Session, exitstatus: int):
 
         # 删除测试临时目录
         if os.path.exists(TEMP_DIR):
-            os.system(f"rm -rf {TEMP_DIR}")
+            # os.rmdir(TEMP_DIR)
+            shutil.rmtree(TEMP_DIR, ignore_errors=True)
 
     Entry.close()
 
