@@ -5,7 +5,7 @@ from pymysql.cursors import DictCursor
 from framework.open.logger import log
 
 
-class MysqlConnPool:
+class MysqlPool:
     """
     mysql连接池
     """

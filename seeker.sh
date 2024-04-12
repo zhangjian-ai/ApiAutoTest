@@ -1,1 +1,1 @@
-python3 -m libs.framework
+python3 -m framework

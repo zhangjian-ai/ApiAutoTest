@@ -1,9 +1,8 @@
-import time
+import pytest
 import traceback
 
-import pytest
-
 from py.xml import html
+
 
 
 """
@@ -58,11 +57,10 @@ def pytest_html_results_table_row(report, cells):
             cells.insert(3, html.td(properties.get("start_time"), class_='col-time'))
 
             # Test列处理
-            # 用例名称，处理报告中文乱码，skipped用例不做处理
+            # 用例名称，处理报告中文乱码
             old = cells.pop(1).pop()
             text = properties.get("origin") + "::" + old.split("::")[1]
-            if "Skipped" not in cells[0]:
-                text = text.encode("raw_unicode_escape").decode("utf-8")
+            text = text.encode("raw_unicode_escape").decode("utf-8")
 
             cells.insert(1, html.td(html.span(text, style_="color: saddlebrown")))
 

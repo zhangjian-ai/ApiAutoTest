@@ -5,7 +5,7 @@ import tkinter as tk
 from _tkinter import TclError
 from tkinter import ttk
 
-from config import CONF_FILE, BASE_DIR, CUSTOM_LIBS, CASE_DIR
+from framework import CONF_FILE, BASE_DIR, USER_UTILS, CASE_DIR
 from framework.core.loads import load_yaml, load_interface, scan_custom, load_case
 
 settings = load_yaml(CONF_FILE)["nightingale"]
@@ -57,22 +57,22 @@ class Seeker:
 
     def get_utils(self):
         if not self.utils:
-            users = scan_custom(CUSTOM_LIBS)
+            users = scan_custom(USER_UTILS)
             self.utils["user_utils"] = {}
             self.utils["fixtures"] = users[1]
 
             for name, unknown in users[0].items():
                 source_path = inspect.getsourcefile(unknown)
                 # 此处收集用户定义的类和方法
-                if source_path.startswith(os.path.join(BASE_DIR, CUSTOM_LIBS)):
+                if source_path.startswith(os.path.join(BASE_DIR, USER_UTILS)):
                     self.utils["user_utils"][name] = unknown
 
-            system = scan_custom(os.path.join("config", "framework", "open"))
+            system = scan_custom(os.path.join("user", "framework", "open"))
             self.utils["system_utils"] = {}
             for name, unknown in system[0].items():
                 source_path = inspect.getsourcefile(unknown)
                 # 框架提供的
-                if source_path.startswith(os.path.join(BASE_DIR, "config", "framework", "open")):
+                if source_path.startswith(os.path.join(BASE_DIR, "user", "framework", "open")):
                     self.utils["system_utils"][name] = unknown
 
         return self.utils

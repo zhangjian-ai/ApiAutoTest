@@ -5,30 +5,28 @@ from email.utils import formataddr
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+from _pytest.config import Config
+
 from framework.open.logger import log
 
 
 class Mail:
     """
     邮件
-    需要使用 pytest config 对象
+    需要使用 pytest user 对象
     """
 
     @classmethod
-    def send_mail(cls, config, content, annex_files: list = None):
+    def send_mail(cls, config: Config, content, annex_files: list = None):
         # 参数处理，部分默认值需要填写
-        smtp_server = config.get("smtp_server")
-        ssl_port = config.get("ssl_port")
-        sender_name = config.get("from_name")
-        from_addr = config.get("email_sender")
-        password = config.get("email_password")
+        smtp_server = config.getoption("smtp_addr")
+        ssl_port = config.getoption("smtp_port")
+        sender_name = config.getoption("sender_name")
+        from_addr = config.getoption("sender_addr")
+        password = config.getoption("sender_pwd")
 
-        subject = f"{config.get('subject')} [{config.get('start_time')}]"
-        recipients = config.get("email_receiver")
-
-        if not all([smtp_server, ssl_port, sender_name, from_addr, password, recipients, subject]):
-            log.warning("邮件参数配置缺失，测试报告已保存到 report 目录。")
-            return
+        subject = config.getoption("subject")
+        recipients = config.getoption("receiver_addr")
 
         try:
             # 链接邮件服务器

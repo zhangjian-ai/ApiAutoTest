@@ -25,7 +25,7 @@
    test_template_01: # 用例标题
      spec:
        marks: [ "daily", "smoke" ]  # 用例的标记
-       skips: [ "release/1.1" ]  # 跳过的分支信息，从内置命令行参数 branch 取值
+       branches: [ "release/1.1" ]  # 归属分支，使用勾子可实现分支和用例的解耦
        fixtures: [ "params" ]  # 自定义的夹具名称，使用自定义夹具，必须自己编写夹具并在 settings 中配置
    
      meta: # 用例元信息，体现在报告中
@@ -119,7 +119,6 @@
      test_demo_01:
        spec:
          marks: [ "smoke" ]  # 用例的mark
-         skips: [ ]  # 跳过分支
        meta:
          desc: "演示用例"
          author: "goodman"
@@ -183,7 +182,6 @@
      test_demo_03:
        spec:
          marks: [ "smoke" ]
-         skips: [ ]
        meta:
          desc: "演示用例"
          author: "goodman"

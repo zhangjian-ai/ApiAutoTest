@@ -6,6 +6,7 @@
 """
 import importlib
 import json
+import re
 import time
 import pytest
 
@@ -15,15 +16,14 @@ from types import FunctionType
 
 from _pytest.fixtures import SubRequest
 
-from framework.core.render import Render
 from framework.open.entry import Setup, Entry, Teardown
 from framework.open.helper import http_request
 from framework.open.logger import log
 
 
-class Control(Entry):
+class Flow(Entry):
     """
-    前置后置控制类
+    流程控制
     """
 
     @classmethod
@@ -63,7 +63,100 @@ class Control(Entry):
             teardown().after()
 
 
-class CapabilitySupport(Entry):
+class Render(Entry):
+    """
+    渲染模版语法内容
+    """
+
+    def __init__(self, params: dict):
+        """
+        构造器
+        @param params: 用例接别的参数化数据
+        """
+        # r对象，应该是一个列表
+        self.r = []
+
+        # 步骤参数化对象
+        self.sp = {}
+
+        # 夹具
+        self.fp = {}
+
+        # 用例参数化对象
+        self.cp = params
+        self.trans(params)
+
+    def trans(self, data):
+        """
+        将对象data中模版语法转换成真是数据
+        """
+        if isinstance(data, dict):
+            for key, val in data.items():
+                if not val:
+                    continue
+
+                if isinstance(val, str):
+                    data[key] = self._render_(val)
+                elif isinstance(val, (dict, list)):
+                    self.trans(val)
+
+        elif isinstance(data, list):
+            for idx, val in enumerate(data):
+                if not val:
+                    continue
+
+                if isinstance(val, str):
+                    data[idx] = self._render_(val)
+                elif isinstance(val, (dict, list)):
+                    self.trans(val)
+        else:
+            pytest.fail(f"trans方法入参类型错误: {type(data)}， 默认只接受 list、dict")
+
+    def _render_(self, origin):
+        """
+        为字符串中的模版语法施加魔法，让其变成真实数据
+        """
+        # 正则匹配出多个模版
+        args = re.findall("@<(.+?)>", origin)
+
+        # 可用的变量参数对象
+        params = {"r": self.r}
+        params.update(self.cp)
+        params.update(self.sp)
+        params.update(self.fp)
+
+        for arg in args:
+            # 转换模版代码为真是数据值
+            target = eval(arg, dict(**self.utils, **params))
+
+            if f"@<{arg}>" == origin:
+                return target
+
+            origin = origin.replace(f"@<{arg}>", str(target))
+
+        return origin
+
+    @staticmethod
+    def trans_parameters(data: dict):
+        """
+        用例级别的参数化允许使用模板替换，但此时仅将str模板转换，如果本身已经是列表，其内部的模板则不做处理，等到执行其内部去转换
+        这样做的目的是万一用例失败重跑，测试数据不会冲突
+        """
+        for key, val in data.items():
+            if isinstance(val, str):
+                args = re.findall("@<(.+?)>", val)
+
+                if args and f"@<{args[0]}>" == val:
+                    try:
+                        target = eval(args[0], Render.utils)
+                    except:
+                        pass
+                    else:
+                        if isinstance(target, list):
+                            data[key] = target
+
+
+class Assist(Entry):
     """
     能力支持
     """
@@ -79,10 +172,10 @@ class CapabilitySupport(Entry):
         if extend_fixtures:
             fixtures.extend(extend_fixtures)
 
-        source = f'def func({",".join(fixtures)}):\n\texecutor.magic.fp=locals()\n\texecutor.schedule()'
+        source_code = f'def func({",".join(fixtures)}):\n\texecutor.render.fp=locals()\n\texecutor.schedule()'
 
         # 将code串编译成code对象
-        code = compile(source=source, filename=name, mode="exec").co_consts[0]
+        code = compile(source=source_code, filename=name, mode="exec").co_consts[0]
 
         # 创建函数
         # globals 选项为函数提供全局变量。比如函数内部需要调用其他方法，如果不指定会ERROR
@@ -334,58 +427,48 @@ class Executor(Entry):
     用例执行器
     """
 
-    def __init__(self, request: SubRequest):
-
-        self.data = request.param
-
-        # 神奇魔法
-        self.magic = Render(deepcopy(self.data.get("param", {})))
-
-        # 记录用例描述信息
-        meta = deepcopy(self.data.get("meta", {}))
-
-        meta["params"] = self.magic.cp
-        meta["start_time"] = time.strftime('%Y-%m-%d %H:%M:%S')
-
-        [request.node.user_properties.append((key, val)) for key, val in meta.items()]
-
-    @staticmethod
-    def _validator(func_name, spec, branch):
+    def __init__(self, data: dict, render: Render):
         """
-        检查用例有效性
+        :param data: 用例数据字典
+        :param render: Render
         """
+        self.data = data
+        self.render = render
 
-        skips = spec.get("skips", [])
-
-        if branch and branch in skips:
-            log.warning(f"分支<{branch}> 已限制用例 <{func_name}> 不执行")
-            pytest.skip(f"分支<{branch}> 已限制用例 <{func_name}> 不执行")
-
-    @staticmethod
-    def request_of(request: SubRequest) -> Optional:
+    @classmethod
+    def request_of(cls, request: SubRequest) -> Optional:
         """
         校验用例的可行性。可行则返回一个Executor实例
         @param request:
         @return:
         """
-        data = request.param
-        config = request.config
+        data = deepcopy(request.param)
         func_name = request.function.__name__
 
-        # 检查可行性
-        Executor._validator(func_name, deepcopy(data.get("spec", {})), config.getoption("branch"))
+        # render
+        render = Render(data.pop("param", {}))
+
+        # 记录用例描述信息
+        meta = data.pop("meta", {})
+        meta["params"] = render.cp
+        meta["start_time"] = time.strftime('%Y-%m-%d %H:%M:%S')
+
+        [request.node.user_properties.append((key, val)) for key, val in meta.items()]
+
+        # 调用校验勾子
+        cls.hooks["pytest_cat_case_validator"](request)
 
         # 用例开始执行
-        log.info(f"执行用例: {func_name} <{data.get('meta', {}).get('desc')}>")
+        log.info(f"执行用例: {func_name} <{meta.get('desc')}>")
 
-        return Executor(request)
+        return Executor(data, render)
 
     def schedule(self):
         """
         用例具体的step在这里调度完成
         """
         # 处理 step 级别的参数化
-        origin_steps = deepcopy(self.data["steps"])
+        origin_steps = self.data["steps"]
         target_steps = []
 
         for step in origin_steps:
@@ -418,13 +501,13 @@ class Executor(Entry):
             if delay:
                 time.sleep(delay)
 
-            # 处理步骤模版参数，转换之后赋值给magic
+            # 处理步骤模版参数，转换之后赋值给render
             args = step.pop("step_args", {})
-            self.magic.trans(args)
-            self.magic.sp = args
+            self.render.trans(args)
+            self.render.sp = args
 
             # 暂存当前接口调用结果到stages
-            self.magic.r.append(self.invoke(step, idx + 1))
+            self.render.r.append(self.invoke(step, idx + 1))
 
     def invoke(self, step, order):
         """
@@ -434,7 +517,7 @@ class Executor(Entry):
         expect = step.pop("response", {})
 
         # 处理动态数据
-        self.magic.trans(step)
+        self.render.trans(step)
 
         # 获取接口信息
         api = self.im.get(step.get("api"))
@@ -466,7 +549,7 @@ class Executor(Entry):
         start = 0
 
         # step 日志
-        log.info(f"Step {order}: {step.get('log', '无当前步骤说明信息，建议补充')}")
+        log.info(f"Step {order}: {step.get('desc', '无当前步骤说明信息，建议补充')}")
 
         while start <= rule["timeout"]:
             try:
@@ -475,9 +558,9 @@ class Executor(Entry):
 
                 # 实时渲染预期结果
                 current_expect = {"expect": deepcopy(expect)}
-                self.magic.trans(current_expect)
+                self.render.trans(current_expect)
 
-                CapabilitySupport.verify_result(current_expect["expect"], response)
+                Assist.verify_result(current_expect["expect"], response)
 
                 break
             except Exception as e:
@@ -490,6 +573,6 @@ class Executor(Entry):
 
                 # 重试日志
                 log.info(
-                    f"Step {order}: {step.get('log', '无当前步骤说明信息，建议补充')} [ retry_times: {start // rule['interval']} ] ")
+                    f"Step {order}: {step.get('desc', '无当前步骤说明信息，建议补充')} [ retry_times: {start // rule['interval']} ] ")
 
         return response or {}

@@ -1,0 +1,45 @@
+####################################
+############# 项目配置 ##############
+####################################
+
+# meta信息，固定格式，不支持命令行传入
+meta:
+  name: "接口自动化测试"
+  products:
+    - name: httpbin
+      path: user/api/httpbin
+      proto:  # 保留字段
+
+# 参数信息，固定格式，user部分可自定义参数，其他部分只允许修改配置值
+# 可用 ${参数名} 形式使用 meta、args 中的参数
+# 所有叶子键不允许重复，这部分配置可使用命令行传入 形式：--args.user.host='www.baidu.com'
+# time变量由系统自动处理。以 %Y-%m-%d %H:%M:%S 时间格式赋值。如果需要时间戳，则使用timestamp，单位s
+args:
+  user:
+    branch: master
+    host: "http://httpbin.org"
+    port: "80"
+    username:
+    password:
+    db_host:
+    db_port:
+    db_user:
+    db_pwd:
+
+  sys:
+    mail:
+      sender_addr:
+      sender_pwd:
+      receiver_addr:
+      sender_name:
+      subject: "测试报告-${branch} [${time}]"
+      smtp_addr: "smtp.exmail.qq.com"
+      smtp_port: "465"
+
+    report:
+      项目名称: "${meta.name}"
+      测试分支: "${branch}"
+      测试地址: "${host}"
+      测试时间: "${time}"
+
+

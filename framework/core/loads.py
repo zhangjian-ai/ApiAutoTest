@@ -5,7 +5,7 @@ from inspect import isfunction, isclass
 from importlib.machinery import SourceFileLoader
 
 # from google.protobuf.internal.python_message import GeneratedProtocolMessageType
-from config import BASE_DIR
+from framework import BASE_DIR
 from framework.open.logger import log
 
 
@@ -113,6 +113,7 @@ def scan_custom(modules: str or list) -> tuple:
     扫描自定义 工具类、函数
     """
     utils = dict()
+    hooks = dict()
     fixtures = dict()
     controllers = dict()
 
@@ -170,9 +171,14 @@ def scan_custom(modules: str or list) -> tuple:
                     if hasattr(unknown, "_pytestfixturefunction"):
                         fixtures[attr] = unknown
                         continue
+
+                    if attr.startswith("pytest_cat"):
+                        hooks[attr] = unknown
+                        continue
+
                     utils[attr] = unknown
 
                 # elif isinstance(unknown, GeneratedProtocolMessageType):
                 #     utils[attr] = unknown
 
-    return utils, fixtures, controllers
+    return utils, hooks, fixtures, controllers

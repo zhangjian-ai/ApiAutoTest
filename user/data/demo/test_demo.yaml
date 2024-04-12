@@ -1,7 +1,7 @@
 test_demo_01:
   spec:
     marks: [ "smoke" ]  # 用例的mark
-    skips: [ ]  # 跳过分支
+    branches: [ "release/1.0" ]  # 归属分支
   meta:
     desc: "演示用例"
     author: "goodman"
@@ -66,7 +66,7 @@ test_demo_02:
 test_demo_03:
   spec:
     marks: [ "smoke" ]
-    skips: [ ]
+    branches: [ ]
   meta:
     desc: "又一个演示用例"
     author: "goodman"

@@ -1,7 +1,6 @@
 import os
 import time
 import json
-import yaml
 import requests
 import traceback
 
@@ -9,7 +8,7 @@ from urllib import parse
 from functools import wraps
 # from google.protobuf import json_format
 # from grpc._channel import _MultiThreadedRendezvous
-from config import TEMP_DIR
+from framework import TEMP_DIR
 from framework.open.entry import Entry
 from framework.open.logger import log
 

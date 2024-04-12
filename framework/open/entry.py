@@ -1,41 +1,44 @@
 from abc import abstractmethod
 from _pytest.config import Config
 
-from config import CUSTOM_LIBS
-from framework.core.db import MysqlConnPool
+from framework import USER_UTILS
+from framework.open import hooks
+from framework.core.db import MysqlPool
 from framework.core.loads import scan_custom
-from framework.core.support import InterfaceManager
+from framework.core.assistant import InterfaceManager
 
 
 class Entry:
     """
     纯纯基类
     """
-    source: dict = None
+    utils: dict = None
+    hooks: dict = None
     fixtures: dict = None
     controllers: dict = None
+
+    mp: MysqlPool = None
     config: Config = None
     im: InterfaceManager = None
-    mysql_pool: MysqlConnPool = None
 
     @classmethod
-    def assemble(cls, config: Config, settings: dict):
+    def assemble(cls, config: Config, products: list):
         cls.config = config
 
         # 接口管理实例
-        cls.im = InterfaceManager(settings.get("meta").get("products"))
+        cls.im = InterfaceManager(products)
 
-        # 收集所有的工具类及方法
-        cls.source, cls.fixtures, cls.controllers = scan_custom(CUSTOM_LIBS)
+        # 收集所有自定义的 工具类和方法、勾子、夹具、前后置类
+        cls.utils, used_hooks, cls.fixtures, cls.controllers = scan_custom(USER_UTILS)
 
-        # mysql 连接池
-        # cls.mysql_pool = MysqlConnPool(host=config.getoption("db_host"), port=config.getoption("db_port"),
-        #                                user=config.getoption("db_user"), password=config.getoption("db_pwd"))
+        # 处理勾子
+        cls.hooks = vars(hooks)
+        cls.hooks.update(used_hooks)
 
     @classmethod
     def close(cls):
-        if cls.mysql_pool:
-            cls.mysql_pool.close()
+        if cls.mp:
+            cls.mp.close()
 
 
 class Setup(Entry):
@@ -50,20 +53,17 @@ class Setup(Entry):
         """
         前置操作逻辑
         """
-        pass
 
     def get_headers(self):
         """
         为http请求提供通用header信息
         优先级低，会被具体用例header覆盖相同的key
         """
-        pass
 
     def get_host(self):
         """
         获取请求的主机地址
         """
-        pass
 
 
 class Teardown(Entry):
@@ -78,4 +78,3 @@ class Teardown(Entry):
         """
         后置操作逻辑
         """
-        pass
