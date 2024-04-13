@@ -125,41 +125,10 @@ def pytest_generate_tests(metafunc: Metafunc):
     if not data:
         raise RuntimeError(f"用例数据不存在，用例名称: {case_name}")
 
-    parameters = data.pop("param", None)
-    items = []
-
-    # 参数化逻辑
-    if parameters:
-        # 参数值处理
-        Render.trans_parameters(parameters)
-
-        # 将参数拆分成参数化对象
-        keys = [key for key in parameters.keys()]
-        # 将所有非列表值修正为列表
-        for key in keys:
-            if not isinstance(parameters[key], (list, tuple)):
-                parameters[key] = [parameters[key]]
-        # 生成参数化结果
-        for i in range(len(parameters[keys[0]])):
-            param = {}
-            for key in keys:
-                param[key] = parameters[key][i]
-            item = deepcopy(data)
-            item["param"] = param
-            items.append(item)
-    else:
-        items.append(data)
-
     # 用例使用到的夹具
-    fixtures = metafunc.definition._fixtureinfo.argnames
-
-    # 构建ids
-    ids = []
-    if len(items) > 1:
-        for idx, item in enumerate(items):
-            ids.append(f"{item.get('meta', {}).get('desc', ' T')} - {idx}")
-    else:
-        ids.append(f"{items[0].get('meta', {}).get('desc', ' T')}")
+    fixtures = metafunc.fixturenames
+    ids, items = Render.render_case(data)
+    print(fixtures)
 
     # 夹具参数化
     for fixture in fixtures:

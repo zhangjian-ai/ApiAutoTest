@@ -136,11 +136,12 @@ class Render(Entry):
 
         return origin
 
-    @staticmethod
-    def trans_parameters(data: dict):
+    @classmethod
+    def simple_trans(cls, data: dict):
         """
-        用例级别的参数化允许使用模板替换，但此时仅将str模板转换，如果本身已经是列表，其内部的模板则不做处理，等到执行其内部去转换
-        这样做的目的是万一用例失败重跑，测试数据不会冲突
+        用例级别的参数化允许使用模板替换，但此时仅将str模板转换，且仅将结果是列表值替换
+        如果本身已经是列表，其内部的模板则不做处理，等到执行其内部去转换
+        目的是在用例失败重跑时，测试数据不会冲突
         """
         for key, val in data.items():
             if isinstance(val, str):
@@ -148,12 +149,88 @@ class Render(Entry):
 
                 if args and f"@<{args[0]}>" == val:
                     try:
-                        target = eval(args[0], Render.utils)
+                        target = eval(args[0], cls.utils)
                     except:
                         pass
                     else:
                         if isinstance(target, list):
                             data[key] = target
+
+    @classmethod
+    def render_case(cls, data) -> tuple:
+        """
+        参数化用例
+        :param data: 用例数据
+        :return: ids: list, items: list
+        """
+        # ids 是对每条用例的描述
+        # items 是参数化后生成的多个具体case
+        ids = []
+        items = []
+        parameters = data.pop("param", None)
+
+        # 参数化逻辑
+        if parameters:
+            # 参数值处理
+            cls.simple_trans(parameters)
+
+            # 将参数拆分成参数化对象
+            keys = [key for key in parameters.keys()]
+            # 将所有非列表值修正为列表
+            for key in keys:
+                if not isinstance(parameters[key], (list, tuple)):
+                    parameters[key] = [parameters[key]]
+            # 生成参数化结果
+            for i in range(len(parameters[keys[0]])):
+                param = {}
+                for key in keys:
+                    param[key] = parameters[key][i]
+                item = deepcopy(data)
+                item["param"] = param
+                items.append(item)
+        else:
+            items.append(data)
+
+        # 构建ids
+        if len(items) > 1:
+            for idx, item in enumerate(items):
+                ids.append(item["param"].get("ids") or item.get("meta", {}).get("desc", "null") + f" - {idx}")
+        else:
+            ids.append(items[0].get("meta", {}).get("desc", "null"))
+
+        return ids, items
+
+    @classmethod
+    def render_step(cls, steps) -> list:
+        """
+        参数化步骤
+        :param steps:
+        :return:
+        """
+        rendered_steps = []
+
+        for step in steps:
+            param = step.pop("param", None)
+            if param:
+                cls.simple_trans(param)
+                keys = [key for key in param.keys()]
+
+                # 将所有非列表值修正为列表
+                for key in keys:
+                    if not isinstance(param[key], (list, tuple)):
+                        param[key] = [param[key]]
+
+                for i in range(len(param[keys[0]])):
+                    args = {}
+                    for key in keys:
+                        args[key] = param[key][i]
+                    item = deepcopy(step)
+                    item["step_args"] = args
+                    rendered_steps.append(item)
+            else:
+                rendered_steps.append(step)
+
+        return rendered_steps
 
 
 class Assist(Entry):
@@ -183,6 +260,71 @@ class Assist(Entry):
         function = FunctionType(code=code, globals=globals(), name=name)
 
         return function
+
+    @classmethod
+    def build_body(cls, step: dict):
+        """
+        构建请求体并返回
+        :param step:
+        :return: dict
+        """
+
+        # 根据协议类型做处理
+        if cls.build_proto(step) in ("http", "https"):
+            # 获取接口信息
+            api: dict = cls.im.get(step["api"])
+
+            # 测试数据补充到默认 api 数据中
+            for key, val in step.get("request").items():
+                if key in api:
+                    if isinstance(api[key], dict):
+                        api[key].update(val)
+                        continue
+
+                    if key == "url":
+                        api["url"] += str(val)
+                        continue
+
+                api[key] = val
+
+            return api
+
+    @classmethod
+    def build_proto(cls, step: dict) -> str:
+        """
+        生成请求协议
+        :param step:
+        :return: http https grpc
+        """
+        return step.get("proto", "http")
+
+    @classmethod
+    def build_request(cls, step: dict):
+        """
+        构建请求函数
+        :param step:
+        :return:
+        """
+
+        if cls.build_proto(step) in ("http", "https"):
+            return http_request
+
+    @classmethod
+    def build_rule(cls, rule: dict) -> dict:
+        """
+        构建步骤执行规则
+        :param rule:
+        :return:
+        """
+        if not rule:
+            return {"timeout": 0, "interval": 3}
+
+        # 默认规则
+        default = dict()
+        default["timeout"] = rule.get("timeout", 0)
+        default["interval"] = rule.get("interval", 3)
+
+        return default
 
     @classmethod
     def _verify_list(cls, key: str, expect: list, response: list, operate: str = "in"):
@@ -353,74 +495,6 @@ class Assist(Entry):
             e.__traceback__ = None
             raise e
 
-    @classmethod
-    def call(cls, step, order):
-        """
-        执行请求
-        """
-        # 获取接口信息
-        api = step.get("api")
-
-        # 为请求数据 处理关联 和 动态数据替换
-        request = deepcopy(step.get("request"))
-        expect = deepcopy(step.get("response", {}))
-
-        # 日志
-        log_info = step.get('log', '无当前步骤说明信息，建议补充')
-
-        # 请求类型
-        is_http = True
-
-        # http 数据拼接
-        if is_http:
-            api = cls.im.get(api)
-
-            # 测试数据替换默认的api数据
-            for key, val in request.items():
-                if key in api:
-                    if key == "url":
-                        api["url"] += str(val)
-
-                    elif isinstance(api[key], dict):
-                        api[key].update(val)
-
-                    continue
-
-                api[key] = val
-        else:
-            pass
-
-        # 根据调度逻辑处理接口调用和验证
-        rule = {"timeout": 0, "interval": 3}
-        rule.update(step.get("rule", {}))
-        rule["interval"] = max(rule["interval"], 1)
-        response = None
-        start = 0
-
-        while start <= rule["timeout"]:
-            try:
-
-                # 打印用户日志
-                retry = start // rule["interval"]
-                suffix = f" [retry_times: {retry}] " if retry > 0 else ""
-                log.info(f" Step {order}: {log_info}{suffix}")
-
-                # 请求接口
-                response = http_request(**api) if is_http else {}
-
-                cls.verify_result(expect, response)
-
-                break
-            except Exception as e:
-                # 如果是最后一次接口调用就引发异常
-                if start > rule["timeout"] - rule["interval"]:
-                    raise e
-
-                start += rule["interval"]
-                time.sleep(rule["interval"])
-
-        return response or {}
-
 
 class Executor(Entry):
     """
@@ -467,35 +541,11 @@ class Executor(Entry):
         """
         用例具体的step在这里调度完成
         """
-        # 处理 step 级别的参数化
-        origin_steps = self.data["steps"]
-        target_steps = []
-
-        for step in origin_steps:
-            param = step.pop("param", None)
-
-            if param:
-                Render.trans_parameters(param)
-
-                keys = [key for key in param.keys()]
-
-                # 将所有非列表值修正为列表
-                for key in keys:
-                    if not isinstance(param[key], (list, tuple)):
-                        param[key] = [param[key]]
-
-                for i in range(len(param[keys[0]])):
-                    args = {}
-                    for key in keys:
-                        args[key] = param[key][i]
-                    item = deepcopy(step)
-                    item["step_args"] = args
-                    target_steps.append(item)
-            else:
-                target_steps.append(step)
+        # 步骤参数化
+        steps = self.render.render_step(self.data.pop("steps", {}))
 
         # 按步骤依次调度
-        for idx, step in enumerate(target_steps):
+        for idx, step in enumerate(steps):
             # 步骤延迟
             delay = step.get("delay")
             if delay:
@@ -503,6 +553,7 @@ class Executor(Entry):
 
             # 处理步骤模版参数，转换之后赋值给render
             args = step.pop("step_args", {})
+            self.render.sp.clear()
             self.render.trans(args)
             self.render.sp = args
 
@@ -514,50 +565,29 @@ class Executor(Entry):
         执行请求
         """
         # 预期结果在每次请求后再做渲染
-        expect = step.pop("response", {})
+        result = step.pop("response", {})
 
         # 处理动态数据
         self.render.trans(step)
 
-        # 获取接口信息
-        api = self.im.get(step.get("api"))
-
-        # 请求类型
-        is_http = True
-
-        # http 数据拼接
-        if is_http:
-            # 测试数据补充到默认 api 数据中
-            for key, val in step.get("request").items():
-                if key in api:
-                    if key == "url":
-                        api["url"] += str(val)
-                    elif isinstance(api[key], dict):
-                        api[key].update(val)
-                    continue
-                api[key] = val
-        else:
-            pass
-
-        # 根据调度逻辑处理接口调用和验证
-        rule = {"timeout": 0, "interval": 3}
-        rule.update(step.get("rule", {}))
-        rule["interval"] = max(rule["interval"], 1)
+        # 步骤规则
+        rule = Assist.build_rule(step.get("rule"))
 
         # 处理请求参数
+        counter = 0
         response = None
-        start = 0
 
-        # step 日志
-        log.info(f"Step {order}: {step.get('desc', '无当前步骤说明信息，建议补充')}")
+        while rule["timeout"] >= 0:
+            # step 日志
+            log.info(f"Step {order}: {step.get('desc', '无当前步骤说明信息，建议补充')}"
+                     + f" [ retry_times: {counter} ] " if counter > 0 else "")
 
-        while start <= rule["timeout"]:
             try:
                 # 请求接口
-                response = http_request(**api) if is_http else {}
+                response = Assist.build_request(step)(**Assist.build_body(step))
 
                 # 实时渲染预期结果
-                current_expect = {"expect": deepcopy(expect)}
+                current_expect = {"expect": deepcopy(result)}
                 self.render.trans(current_expect)
 
                 Assist.verify_result(current_expect["expect"], response)
@@ -565,14 +595,12 @@ class Executor(Entry):
                 break
             except Exception as e:
                 # 如果是最后一次接口调用就引发异常
-                if start > rule["timeout"] - rule["interval"]:
+                if rule["timeout"] < rule["interval"]:
                     raise e
 
-                start += rule["interval"]
                 time.sleep(rule["interval"])
 
-                # 重试日志
-                log.info(
-                    f"Step {order}: {step.get('desc', '无当前步骤说明信息，建议补充')} [ retry_times: {start // rule['interval']} ] ")
+                counter += 1
+                rule["timeout"] -= rule["interval"]
 
         return response or {}

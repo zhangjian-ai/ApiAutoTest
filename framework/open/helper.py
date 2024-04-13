@@ -42,7 +42,7 @@ class DbUtils:
                 if params and not isinstance(params, (tuple, list)):
                     raise RuntimeError(f"params 参数类型错误, 当前类型 {type(params)}, 可接受的类型有 tuple list")
 
-                kwargs["result"] = Entry.mysql_pool.query(sql, params, size)
+                kwargs["result"] = Entry.mp.query(sql, params, size)
 
                 return func(*args, **kwargs)
 
@@ -73,7 +73,7 @@ class DbUtils:
                 if params and isinstance(params, (tuple, list)):
                     raise RuntimeError(f"params 参数类型错误, 当前类型 {type(params)}, 可接受的类型有 tuple list")
 
-                kwargs["result"] = Entry.mysql_pool.modify(sql, params)
+                kwargs["result"] = Entry.mp.modify(sql, params)
 
                 return func(*args, **kwargs)
 
@@ -143,7 +143,8 @@ def http_request(method="POST", url=None, data=None, params=None, headers=None, 
         data = json.dumps(data)
 
     try:
-        response = requests.request(method, url, data=data, params=params, headers=headers, cookies=cookies)
+        response = requests.request(method, url, data=data, params=params,
+                                    headers=headers, cookies=cookies, verify=False)
         res = None
         try:
             res = response.json()
