@@ -579,8 +579,8 @@ class Executor(Entry):
 
         while rule["timeout"] >= 0:
             # step 日志
-            log.info(f"Step {order}: {step.get('desc', '无当前步骤说明信息，建议补充')}"
-                     + f" [ retry_times: {counter} ] " if counter > 0 else "")
+            suffix = f"[ retry_times: {counter} ] " if counter > 0 else ""
+            log.info(f"Step {order}: {step.get('desc', '无当前步骤说明信息，建议补充')} {suffix}")
 
             try:
                 # 请求接口

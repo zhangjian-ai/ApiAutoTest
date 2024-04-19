@@ -28,12 +28,12 @@ args:
 
   sys:
     mail:
-      sender_addr:
-      sender_pwd:
-      receiver_addr:
-      sender_name:
+      sender_addr: zj19180525254@163.com
+      sender_pwd: PFLCSKHNKOATAFXJ
+      receiver_addr: 1340026934@qq.com
+      sender_name: seeker
       subject: "测试报告-${branch} [${time}]"
-      smtp_addr: "smtp.exmail.qq.com"
+      smtp_addr: "smtp.163.com"
       smtp_port: "465"
 
     report:
