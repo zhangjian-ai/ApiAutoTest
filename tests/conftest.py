@@ -128,7 +128,6 @@ def pytest_generate_tests(metafunc: Metafunc):
     # 用例使用到的夹具
     fixtures = metafunc.fixturenames
     ids, items = Render.render_case(data)
-    print(fixtures)
 
     # 夹具参数化
     for fixture in fixtures:
