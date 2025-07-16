@@ -1,10 +1,9 @@
 import os
-import shutil
-
+import time
 import xdist
+import platform
 
 from typing import List
-from copy import deepcopy
 
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
@@ -15,21 +14,13 @@ from _pytest.python import Metafunc
 from _pytest.runner import CallInfo
 from py._path.local import LocalPath
 
-from framework.core.report import *
-from framework.core.mail import Mail
-from framework.core.loads import load_case, load_yaml
-from framework.core.assistant import flatten, replace_args
-from framework.core.runner import Executor, Assist, Flow, Render
-
-from framework.open.entry import Entry
-from framework.open.logger import log
-from framework import TEMP_DIR, CASE_DIR, CONF_FILE
-
-
-# 项目配置
-settings = load_yaml(CONF_FILE)
-meta = settings["meta"]
-args = settings["args"]
+from framework.report import *
+from framework.logger import log
+from framework.loads import load_case
+from framework.consts import Gather
+from framework.values import case_dir, settings
+from framework.runner import Executor, Process, Flow, Render
+from framework.assists import flat_dict, check_path, stat_result
 
 
 def pytest_addoption(parser: Parser):
@@ -38,16 +29,11 @@ def pytest_addoption(parser: Parser):
     初始化时最先调用的Hook
     """
 
-    # 内置固定命令行
-    parser.addoption("--case", action="store", default="")
+    # 命令行注入
+    commands = flat_dict(settings)
 
-    # 注册配置令行
-    for key, val in flatten(meta).items():
-        parser.addoption("--meta." + key, action="store", default=str(val))
-
-    for key, val in flatten(args).items():
-        key = key.rsplit(".", 1)[1] if key.__contains__(".") else key
-        parser.addoption("--" + key, action="store", default=str(val))
+    for k, v in commands.items():
+        parser.addoption("--" + k, action="store", default=v or "")
 
 
 def pytest_configure(config: Config):
@@ -58,8 +44,11 @@ def pytest_configure(config: Config):
     # 测试进程开始
     log.info("测试进程启动")
 
-    # 装载Entry
-    Entry.assemble(config, meta.get("products"))
+    # 加载数据到基类
+    Gather.assemble(config)
+
+    # 记录测试开始时间
+    config.option.__dict__["session_start"] = time.time()
 
 
 def pytest_sessionstart(session: Session):
@@ -67,13 +56,6 @@ def pytest_sessionstart(session: Session):
     创建Session对象后调用的Hook
     config对象配置为session的属性
     """
-    # 创建测试临时目录
-    if not os.path.exists(TEMP_DIR):
-        os.makedirs(TEMP_DIR)
-
-    # 处理config中存储的命令行参数
-    replace_args([key.rsplit(".", 1)[1] if key.__contains__(".") else key for key in flatten(args).keys()], session.config)
-
     # 执行前置
     Flow.run_setup()
 
@@ -84,8 +66,7 @@ def pytest_sessionstart(session: Session):
     metadata = session.config._metadata
     metadata.clear()
 
-    for key in args["sys"]["report"].keys():
-        metadata[key] = session.config.getoption(key)
+    # TODO 可以加一些自己需要的信息
 
 
 def pytest_pycollect_makemodule(path: LocalPath, parent: Collector):
@@ -93,20 +74,19 @@ def pytest_pycollect_makemodule(path: LocalPath, parent: Collector):
     pytest收集到测试模块后调用的hook函数
     """
     # 从入口文件开始配置测试
-    if path.purebasename == "test_entrypoint":
+    if path.purebasename == "test_entrance":
 
         # 获取用例名称及其文件路径的映射关系
-        cases = load_case(target_dir=os.path.join(CASE_DIR),
-                          target=parent.config.getoption("case"))
+        cases = load_case(target_dir=os.path.join(case_dir))
 
         # 导入入口模块，加载用例
         from importlib import import_module
-        module = import_module("tests.test_entrypoint")
+        module = import_module("tests.test_entrance")
 
         # 构建用例
         for key, val in cases.items():
             setattr(module, key,
-                    Assist.build_func(key, extend_fixtures=val.get("spec", {}).get("fixtures", [])))
+                    Process.build_func(key, extend_fixtures=val.get("meta", {}).get("fixtures", [])))
 
         # 传递测试数据
         parent.config.cases = cases
@@ -141,6 +121,24 @@ def pytest_collection_modifyitems(session: Session, config: Config, items: List[
     用例参数化完成后调用的hook
     """
 
+    # 用例过滤
+    target = config.getoption("test.case")
+
+    if target:
+        point = 0
+        target_items = [item.strip() for item in target.split(",")]
+        func_ids = [item for item in target_items if item.startswith("test_")]
+        cls_ids = [item for item in target_items if item.startswith("Test")]
+        path_kws = [item for item in target_items if ((item not in func_ids) and (item not in cls_ids))]
+
+        while point < len(items):
+            if (items[point].name not in func_ids) and (items[point].parent.name not in cls_ids) and not check_path(
+                    path_kws, config.cases.get(items[point].name)["meta"]["origin"]):
+                items.pop(point)
+                continue
+
+            point += 1
+
     # item表示每个测试用例
     for item in items:
         # 处理console中文显示问题
@@ -148,7 +146,9 @@ def pytest_collection_modifyitems(session: Session, config: Config, items: List[
         item._nodeid = item._nodeid.encode("utf-8").decode("unicode-escape")
 
         # 为item添加mark
-        for mark in config.cases.get(item.originalname).get("spec", {}).get("marks", ""):
+        meta = config.cases.get(item.originalname).get("meta")
+        item.add_marker(meta["level"])
+        for mark in meta.get("markers", []):
             item.add_marker(mark)
 
 
@@ -157,6 +157,7 @@ def pytest_runtest_makereport(item: Item, call: CallInfo[None]):
     """
     根据测试结果打印用例完成的日志
     """
+
     out = yield
 
     if call.when == 'call':
@@ -169,23 +170,11 @@ def pytest_runtest_makereport(item: Item, call: CallInfo[None]):
 
 @pytest.hookimpl(trylast=True)
 def pytest_sessionfinish(session: Session, exitstatus: int):
-    if xdist.is_xdist_master(session):
-        # 测试报告也仅在主节点发送一次
-        if hasattr(session.config, "_html"):
-            with open(session.config._html.logfile, "r") as f:
-                Mail.send_mail(config=session.config, content=f.read(),
-                               annex_files=[session.config._html.logfile])
+    # TODO 发送测试报告邮件
+    if xdist.is_xdist_master(session): ...
 
-        # 分布式测试时，在主节点执行数据清理逻辑
-        log.info("执行测试后处理")
-        Flow.run_teardown()
-
-        # 删除测试临时目录
-        if os.path.exists(TEMP_DIR):
-            # os.rmdir(TEMP_DIR)
-            shutil.rmtree(TEMP_DIR, ignore_errors=True)
-
-    Entry.close()
+    log.info("执行测试后处理")
+    Flow.run_teardown()
 
     log.info(f"测试进程结束，Exit Code:{exitstatus}")
 

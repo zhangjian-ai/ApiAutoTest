@@ -1,0 +1,9 @@
+# 项目配置
+
+settings:
+  test:
+    host: www.baidu.com # 测试环境地质
+    case:  # 指定case名称实现过滤
+    dist: 0  # 分布式测试，0表示不进行分布式
+    mode: load  # each: 每个进程都执行所有用例；load: 尽量均匀的分发给各个测试进程
+    mark: # 标签过滤

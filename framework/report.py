@@ -4,7 +4,6 @@ import traceback
 from py.xml import html
 
 
-
 """
 设置html报告样式
 依赖插件 pytest-html
@@ -34,11 +33,10 @@ def pytest_html_results_table_header(cells):
     cells.pop(-1)
 
     # 表头
-    cells.insert(3, html.th('StartTime', class_='sortable time', col='time'))
+    cells.insert(2, html.th('StartTime', class_='sortable time', col='time'))
     cells.insert(4, html.th('用例描述'))
     cells.insert(5, html.th("作者"))
     cells.insert(6, html.th("用例等级"))
-    cells.insert(7, html.th("更新时间"))
 
 
 @pytest.mark.optionalhook
@@ -49,12 +47,12 @@ def pytest_html_results_table_row(report, cells):
     if report:
         try:
 
-            # 测试时长
-            cells.insert(2, html.td(html.span(cells.pop(2).pop(), style_="color: black")))
-
             # 自定义列
             properties = dict(report.user_properties)
-            cells.insert(3, html.td(properties.get("start_time"), class_='col-time'))
+            cells.insert(2, html.td(properties.get("start_time"), class_='col-time'))
+
+            # 测试时长
+            cells.insert(3, html.td(html.span(cells.pop(3).pop(), style_="color: black")))
 
             # Test列处理
             # 用例名称，处理报告中文乱码
@@ -80,9 +78,8 @@ def pytest_html_results_table_row(report, cells):
             cells.insert(4, desc_td)
 
             # 其他信息
-            cells.insert(5, html.td(html.span(properties.get('author', ""), style_="color: black")))
-            cells.insert(6, html.td(html.span(properties.get('level', ""), style_="color: black")))
-            cells.insert(7, html.td(html.span(properties.get('time', ""), style_="color: black")))
+            cells.insert(5, html.td(html.span(properties.get('priority', ""), style_="color: black")))
+            cells.insert(6, html.td(html.span(properties.get('author', ""), style_="color: black")))
 
         except Exception as e:
             traceback.print_exc()

@@ -1,14 +1,8 @@
-"""
-@Project: api-auto-test
-@File: runner.py
-@Author: Seeker
-@Date: 2023/7/8 5:58 下午
-"""
-import importlib
-import json
 import re
 import time
+import json
 import pytest
+import importlib
 
 from copy import deepcopy
 from typing import Optional
@@ -16,12 +10,14 @@ from types import FunctionType
 
 from _pytest.fixtures import SubRequest
 
-from framework.open.entry import Setup, Entry, Teardown
-from framework.open.helper import http_request
-from framework.open.logger import log
+from framework.logger import log
+from framework.values import protos
+from framework.consts import Gather, Setup, Teardown
+from business.define import HTPBInterface, HTTPInterface
+from framework.invoke import http_request, htpb_request
 
 
-class Flow(Entry):
+class Flow(Gather):
     """
     流程控制
     """
@@ -31,14 +27,9 @@ class Flow(Entry):
         """
         根据用户配置的 Setup 类 执行前置操作
         """
-        for setup in cls.controllers.get("__setup__", []):
-            if not issubclass(setup, Setup):
-                raise RuntimeError(f"自定义前置类不是 Setup 子类: {setup}")
-
-            cls.config.setup = setup()
-
+        for setup in Setup.__subclasses__():
             # 执行准备工作
-            cls.config.setup.before()
+            setup().before()
 
     @classmethod
     def inject_fixture(cls):
@@ -47,23 +38,20 @@ class Flow(Entry):
         """
         module = importlib.import_module("tests.conftest")
 
-        for fixture in cls.fixtures.values():
-            setattr(module, fixture.__name__, fixture)
+        for name, fixture in cls.fixtures.items():
+            setattr(module, name, fixture)
 
     @classmethod
     def run_teardown(cls):
         """
         根据用户配置的 Teardown 类 执行后置操作
         """
-        for teardown in cls.controllers.get("__teardown__", []):
-            if not issubclass(teardown, Teardown):
-                raise RuntimeError(f"自定义后置类不是 Teardown 子类: {teardown}")
-
+        for teardown in Teardown.__subclasses__():
             # 执行后置工作
             teardown().after()
 
 
-class Render(Entry):
+class Render(Gather):
     """
     渲染模版语法内容
     """
@@ -78,9 +66,6 @@ class Render(Entry):
 
         # 步骤参数化对象
         self.sp = {}
-
-        # 夹具
-        self.fp = {}
 
         # 用例参数化对象
         self.cp = params
@@ -123,7 +108,6 @@ class Render(Entry):
         params = {"r": self.r}
         params.update(self.cp)
         params.update(self.sp)
-        params.update(self.fp)
 
         for arg in args:
             # 转换模版代码为真是数据值
@@ -167,7 +151,7 @@ class Render(Entry):
         # items 是参数化后生成的多个具体case
         ids = []
         items = []
-        parameters = data.pop("param", None)
+        parameters = data.pop("params", None)
 
         # 参数化逻辑
         if parameters:
@@ -186,7 +170,7 @@ class Render(Entry):
                 for key in keys:
                     param[key] = parameters[key][i]
                 item = deepcopy(data)
-                item["param"] = param
+                item["params"] = param
                 items.append(item)
         else:
             items.append(data)
@@ -194,9 +178,9 @@ class Render(Entry):
         # 构建ids
         if len(items) > 1:
             for idx, item in enumerate(items):
-                ids.append(item["param"].get("ids") or item.get("meta", {}).get("desc", "null") + f" - {idx}")
+                ids.append(item["meta"]["desc"] + f" - {item['params'].get('ids') or idx}")
         else:
-            ids.append(items[0].get("meta", {}).get("desc", "null"))
+            ids.append(items[0].get["meta"]["desc"])
 
         return ids, items
 
@@ -210,7 +194,7 @@ class Render(Entry):
         rendered_steps = []
 
         for step in steps:
-            param = step.pop("param", None)
+            param = step.pop("params", None)
             if param:
                 cls.simple_trans(param)
                 keys = [key for key in param.keys()]
@@ -233,9 +217,9 @@ class Render(Entry):
         return rendered_steps
 
 
-class Assist(Entry):
+class Process(Gather):
     """
-    能力支持
+    过程能力
     """
 
     @classmethod
@@ -249,7 +233,7 @@ class Assist(Entry):
         if extend_fixtures:
             fixtures.extend(extend_fixtures)
 
-        source_code = f'def func({",".join(fixtures)}):\n\texecutor.render.fp=locals()\n\texecutor.schedule()'
+        source_code = f'def func({",".join(fixtures)}):\n\texecutor.schedule()'
 
         # 将code串编译成code对象
         code = compile(source=source_code, filename=name, mode="exec").co_consts[0]
@@ -262,69 +246,49 @@ class Assist(Entry):
         return function
 
     @classmethod
-    def build_body(cls, step: dict):
+    def invoker(cls, step: dict):
         """
-        构建请求体并返回
-        :param step:
-        :return: dict
+        处理测试步骤的请求逻辑
         """
+        request = step.pop("request")
+        meta = request.pop("meta")
+        proto = meta["proto"].upper()
 
-        # 根据协议类型做处理
-        if cls.build_proto(step) in ("http", "https"):
-            # 获取接口信息
-            api: dict = cls.im.get(step["api"])
+        if proto not in protos:
+            raise RuntimeError(f"不支持的协议类型: {proto}")
+
+        if proto in ["HTTP", "HTPB"]:
+            api_name = meta["name"]
+            poly_cls, caller = (HTTPInterface, http_request) if proto == "HTTP" else (HTPBInterface, htpb_request)
+
+            if not hasattr(poly_cls, api_name):
+                raise RuntimeError(f"接口聚合类中没有预期的接口: {api_name}")
+
+            api = getattr(poly_cls, api_name)
 
             # 测试数据补充到默认 api 数据中
-            for key, val in step.get("request").items():
-                if key in api:
-                    if isinstance(api[key], dict):
-                        api[key].update(val)
+            data = deepcopy(api.interface)
+            data["url"] = cls.config.getoption("test.host") + api.url
+            for key, val in request.items():
+                if key in data:
+                    if isinstance(data[key], dict):
+                        data[key].update(val)
                         continue
 
-                    if key == "url":
-                        api["url"] += str(val)
+                    if isinstance(data[key], list):
+                        data[key].extend(val)
                         continue
 
-                api[key] = val
+                    if val:
+                        data[key] = val
 
-            return api
+            # 发起请求并返回结果
+            return caller(**data)
 
-    @classmethod
-    def build_proto(cls, step: dict) -> str:
-        """
-        生成请求协议
-        :param step:
-        :return: http https grpc
-        """
-        return step.get("proto", "http")
+        if proto == "HOOK":
+            func = meta["func"]
 
-    @classmethod
-    def build_request(cls, step: dict):
-        """
-        构建请求函数
-        :param step:
-        :return:
-        """
-
-        if cls.build_proto(step) in ("http", "https"):
-            return http_request
-
-    @classmethod
-    def build_rule(cls, rule: dict) -> dict:
-        """
-        构建步骤执行规则
-        :param rule:
-        :return:
-        """
-        if not rule:
-            return {"timeout": 0, "interval": 3}
-
-        # 默认规则
-        default = dict()
-        default["timeout"] = rule.get("timeout", 0)
-        default["interval"] = rule.get("interval", 3)
-
-        return default
+            return eval(func, **cls.utils)
 
     @classmethod
     def _verify_list(cls, key: str, expect: list, response: list, operate: str = "in"):
@@ -462,11 +426,6 @@ class Assist(Entry):
             # 如果预期值是str、int、float那么就直接对比
             elif isinstance(value, (str, int, float)):
                 assert isinstance(response, dict), f"预期的数据类型是 DICT，而不是 {type(response)}"
-
-                if isinstance(value, str) and value.isdigit():
-                    value = float(value)
-                    response[key] = float(response.get(key, 0))
-
                 assert value == response.get(key), f'\n' \
                                                    f'KEY: {key} \n' \
                                                    f'预期结果: {json.dumps(expect, indent=2, ensure_ascii=False)}\n' \
@@ -496,7 +455,7 @@ class Assist(Entry):
             raise e
 
 
-class Executor(Entry):
+class Executor(Gather):
     """
     用例执行器
     """
@@ -520,17 +479,14 @@ class Executor(Entry):
         func_name = request.function.__name__
 
         # render
-        render = Render(data.pop("param", {}))
+        render = Render(data.pop("params", {}))
 
-        # 记录用例描述信息
+        # 记录用例元信息
         meta = data.pop("meta", {})
         meta["params"] = render.cp
         meta["start_time"] = time.strftime('%Y-%m-%d %H:%M:%S')
 
         [request.node.user_properties.append((key, val)) for key, val in meta.items()]
-
-        # 调用校验勾子
-        cls.hooks["pytest_cat_case_validator"](request)
 
         # 用例开始执行
         log.info(f"执行用例: {func_name} <{meta.get('desc')}>")
@@ -564,43 +520,20 @@ class Executor(Entry):
         """
         执行请求
         """
+        log.info(f"Step {order}: {step.get('desc', '无当前步骤说明信息，建议补充')}")
+
         # 预期结果在每次请求后再做渲染
         result = step.pop("response", {})
 
         # 处理动态数据
         self.render.trans(step)
 
-        # 步骤规则
-        rule = Assist.build_rule(step.get("rule"))
+        response = Process.invoker(step)
 
-        # 处理请求参数
-        counter = 0
-        response = None
+        # 实时渲染预期结果
+        current_expect = {"expect": deepcopy(result)}
+        self.render.trans(current_expect)
 
-        while rule["timeout"] >= 0:
-            # step 日志
-            suffix = f"[ retry_times: {counter} ] " if counter > 0 else ""
-            log.info(f"Step {order}: {step.get('desc', '无当前步骤说明信息，建议补充')} {suffix}")
-
-            try:
-                # 请求接口
-                response = Assist.build_request(step)(**Assist.build_body(step))
-
-                # 实时渲染预期结果
-                current_expect = {"expect": deepcopy(result)}
-                self.render.trans(current_expect)
-
-                Assist.verify_result(current_expect["expect"], response)
-
-                break
-            except Exception as e:
-                # 如果是最后一次接口调用就引发异常
-                if rule["timeout"] < rule["interval"]:
-                    raise e
-
-                time.sleep(rule["interval"])
-
-                counter += 1
-                rule["timeout"] -= rule["interval"]
+        Process.verify_result(current_expect["expect"], response)
 
         return response or {}

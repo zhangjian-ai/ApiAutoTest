@@ -1,0 +1,47 @@
+test_demo_001:
+  meta:
+    desc: "演示用例-001的描述"
+    author: "xxx"
+    level: "P1"
+    markers: [ "smoke" ]
+    fixtures: [ "demo" ]  # 为用例配置fixture
+
+  params:
+    ids: [ "参数化第一组", "参数化第二组" ]
+    key1: [ "k1_v1", "k1_v2" ]
+    key2: [ [ "a1", "b1" ], [ "a2", "b2" ] ]
+
+  steps: [
+    {
+      desc: "演示接口",
+      request: {
+        meta: {
+          proto: "HTPB",  # 目前支持 HTTP、HTPB
+          name: "xxxx",  # api名称
+        },
+        data: {
+          key: "@<key1>",
+          val: "@<key2>"
+        },
+
+        params: {
+          oaid: "android",
+          t: "@<r[0]['data']['id']>"
+        },
+
+        headers: {
+          "Auth": "Copyright reserved, please purchase"
+        }
+      },
+      response: {
+        json: {
+          key: "@<key1>",
+          val: "@<DataFox.random_text()>"
+        },
+        status_code: 200
+      }
+    },
+    {
+      # 下一个步骤
+    }
+  ]
