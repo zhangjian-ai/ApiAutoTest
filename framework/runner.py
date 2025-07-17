@@ -13,7 +13,7 @@ from _pytest.fixtures import SubRequest
 from framework.logger import log
 from framework.values import protos
 from framework.consts import Gather, Setup, Teardown
-from business.define import HTPBInterface, HTTPInterface
+from business.proxy import HTPBInterface, HTTPInterface
 from framework.invoke import http_request, htpb_request
 
 
@@ -285,10 +285,7 @@ class Process(Gather):
             # 发起请求并返回结果
             return caller(**data)
 
-        if proto == "HOOK":
-            func = meta["func"]
-
-            return eval(func, **cls.utils)
+        # TODO 非接口类的测试也可以继续实现
 
     @classmethod
     def _verify_list(cls, key: str, expect: list, response: list, operate: str = "in"):

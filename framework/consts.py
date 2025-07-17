@@ -70,8 +70,9 @@ class Gather:
     def assemble(cls, config: Config):
         cls.config = config
 
-        from business import fixtures
         from business import tools
+        from business import fixtures
+        from business import control
 
         cls.fixtures = {k: v for k, v in vars(fixtures).items() if not k.startswith("_")}
         cls.utils = {k: v for k, v in vars(tools).items() if not k.startswith("_")}

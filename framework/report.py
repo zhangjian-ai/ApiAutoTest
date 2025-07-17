@@ -69,6 +69,12 @@ def pytest_html_results_table_row(report, cells):
 
             if properties.get('params'):
                 for key, val in properties.get('params').items():
+                    if key == "ids":
+                        continue
+
+                    if isinstance(val, (dict, list)):
+                        val = str(val)
+
                     div = html.div()
                     div.append(html.span(f"| {key} : ", style_="color: green"))
                     div.append(html.span(val, style_="color: peru"))
